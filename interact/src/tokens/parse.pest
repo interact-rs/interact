@@ -1,0 +1,63 @@
+token_list = _{ (token)* }
+
+token = _{
+      identifier
+    | nonnegative_decimal
+    | decimal
+    | string_literal
+    | char_literal
+    | range_access
+    | range_access_inclusive
+    | field_access
+    | subscript_open
+    | subscript_close
+    | tuple_open
+    | tuple_close
+    | curly_open
+    | curly_close
+    | colon
+    | assign
+    | comma
+    | invalid
+}
+
+identifier             = @{ (alpha | underscore) ~ (alphanumeric | underscore)* }
+decimal                = @{ nonnegative_decimal | negative_decimal }
+nonnegative_decimal    = @{ (nonzero ~ digit*) | digit }
+string_literal         = @{ "\"" ~ literal_char* ~ "\"" }
+char_literal           = @{ "\'" ~ single_literal_char ~ "\'" }
+
+field_access           = { "." }
+range_access           = { ".." }
+assign                 = { "=" }
+range_access_inclusive = { ".=" }
+
+subscript_open         = { "[" }
+subscript_close        = { "]" }
+
+curly_open             = { "{" }
+curly_close            = { "}" }
+
+tuple_open             = { "(" }
+tuple_close            = { ")" }
+colon                  = { ":" }
+
+comma                  = { "," }
+underscore             = { "_" }
+
+invalid                = { ANY }
+
+literal_char           = _{ escape_sequence | (!"\"" ~ ANY) }
+single_literal_char    = _{ escape_sequence | (!"\'" ~ ANY) }
+
+alpha                  = _{ 'a'..'z' | 'A'..'Z' }
+alphanumeric           = _{ alpha | '0'..'9' }
+
+negative_decimal       = _{ "-" ~ nonnegative_decimal }
+digit                  = _{ "0" | nonzero }
+nonzero                = _{ '1'..'9' }
+
+escape_sequence        = _{ "\\\\" | "\\\"" | "\\\'" | "\\n" | "\\r" | "\\t" | "\\0" }
+
+whitespace_char        = _{ " " | "\t" | "\u{000C}" | "\r" | "\n" }
+WHITESPACE             = _{ (whitespace_char)+ }

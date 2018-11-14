@@ -1,0 +1,12 @@
+[workspace]
+
+members = [
+    "interact",
+    "interact_derive",
+    "interact_prompt",
+]
+
+[patch.crates-io]
+interact = { path = "interact" }
+interact_derive = { path = "interact_derive" }
+interact_prompt = { path = "interact_prompt" }

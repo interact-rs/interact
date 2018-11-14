@@ -1,0 +1,23 @@
+[package]
+name = "interact_derive"
+version = "0.1.0"
+authors = ["Dan Aloni <alonid@gmail.com>"]
+edition = "2018"
+license = "MIT/Apache-2.0"
+description = "A framework for online program state introspection"
+homepage = "https://github.com/interact-rs/interact"
+repository = "https://github.com/interact-rs/interact"
+# documentation = "" TODO Github pages
+keywords = ["prompt", "reflection", "introspection", "interact", "cli"]
+categories = ["command-line-interface"]
+readme = "crates-io.md"
+include = ["Cargo.toml", "src/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = { version = "0.12", features = ["extra-traits", "full"]  }
+quote = "0.4"
+proc-macro2 = "0.2"
+serde_derive_internals = "0.21"

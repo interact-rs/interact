@@ -14,7 +14,7 @@ readme = "crates-io.md"
 include = ["Cargo.toml", "src/**/*.rs", "src/**/*.pest", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [dependencies]
-interact_derive = "0.1"
+interact_derive = "0.2"
 ron = "0.4"
 pest = "2.0.1"
 pest_derive = "2.0.1"

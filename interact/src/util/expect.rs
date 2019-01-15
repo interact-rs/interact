@@ -1,3 +1,14 @@
+//! The `Expect` struct manages the tree of expectations during parsing.
+//!
+//! While parsing an expression for `Token`s, the parser may have expectations at each point in the
+//! way of what tokens should appear. In case these tokens do not show up, we can remember what
+//! tokens could have appeared and then backtrack the parsing. This crates a tree that can be later
+//! flattened in order to present a list of options.
+//!
+//! This allows to implement auto-completion and hints so that users can type the minimal amount of
+//! characters. That is especially relevant in the case where there's only one token that can
+//! follow.
+
 #[derive(Debug, Eq, PartialEq, Clone)]
 struct Expect<T> {
     item: T,
@@ -34,6 +45,7 @@ impl<T> ExpectTree<T>
 where
     T: Eq + PartialEq + Clone,
 {
+    /// Construct an empty tree
     pub fn new() -> Self {
         Self {
             path: vec![],
@@ -41,6 +53,7 @@ where
         }
     }
 
+    /// Register `value` as expected at this stage, and advance to the next token.
     pub fn advance(&mut self, value: T) {
         let mut r = &mut self.tree;
 
@@ -69,15 +82,19 @@ where
         self.path.len()
     }
 
+    /// Back track one token.
     pub fn retract_one(&mut self) {
         self.path.truncate(self.path.len() - 1);
     }
 
+    /// Back track to a certain length.
     pub fn retract_path(&mut self, old_len: usize) {
         assert!(old_len <= self.path.len());
         self.path.truncate(old_len);
     }
 
+    /// Resolve the tree into a list of possible token vectors, based on
+    /// where that were junctions in the expectation tree.
     pub fn into_flatten(self) -> Vec<Vec<T>> {
         let mut tv = vec![];
 
@@ -91,6 +108,7 @@ where
         tv
     }
 
+    /// Return a reference to the last added token.
     pub fn last(&self) -> Option<&T> {
         let mut r = &self.tree;
         let mut item = None;

@@ -1,6 +1,6 @@
 use crate::{ExpectTree, Token, TokenInner, TokenVec};
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum DeserError {
     EndOfTokenList,
     NumberTooLarge,

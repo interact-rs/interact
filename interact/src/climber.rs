@@ -12,7 +12,7 @@ use crate::{
     TokenVec,
 };
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum ClimbError {
     AssignError(crate::access::AssignError),
     Borrowed,

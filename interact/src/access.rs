@@ -62,7 +62,7 @@ pub enum ReflectMut<'a> {
     Immutable,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum AssignError {
     Deser(deser::DeserError),
 
@@ -71,7 +71,7 @@ pub enum AssignError {
     Immutable,
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum CallError {
     Deser(deser::DeserError),
     NeedMutable,

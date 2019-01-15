@@ -7,6 +7,7 @@ use std::sync::{Arc, Mutex};
 use crate::access::derive::{ReflectEnum, ReflectStruct, StructKind};
 use crate::deser;
 use crate::reflector::Reflector;
+use crate::{NextOptions, Assist};
 use crate::{
     Access, CallError, ExpectTree, Function, NodeInfo, NodeTree, ReflectMut, Token, TokenInner,
     TokenVec,
@@ -32,11 +33,11 @@ pub enum ClimbError {
 
 #[derive(Clone)]
 pub struct Climber<'a> {
-    pub probe_only: bool,
+    probe_only: bool,
     reflector: Arc<Reflector>,
-    pub expect: ExpectTree<Token<'static>>,
-    pub tokenvec: TokenVec<'a>,
-    pub valid_pos: usize,
+    expect: ExpectTree<Token<'static>>,
+    tokenvec: TokenVec<'a>,
+    valid_pos: usize,
     sender: Option<Sender<(Arc<Mutex<Climber<'static>>>, Result<NodeTree, ClimbError>)>>,
 }
 
@@ -554,6 +555,38 @@ impl<'a> Climber<'a> {
         } else {
             Err(ClimbError::UnexpectedToken)
         }
+    }
+
+    pub fn is_probe_only(&self) -> bool {
+        self.probe_only
+    }
+
+    pub fn convert_to_assist(mut self) -> (Assist<Vec<Token<'static>>>, usize) {
+        let mut assist = Assist::default();
+        assist.pend(self.valid_pos);
+        assist.commit_pending();
+
+        let flatten = self.expect.into_flatten();
+        let mut pending_partial = 0;
+
+        if !self.tokenvec.is_empty() {
+            let text = &self.tokenvec.top().text;
+            let mut good = !flatten.is_empty();
+            for opt in &flatten {
+                if !opt[0].text.starts_with(text.as_ref()) {
+                    good = false;
+                    break;
+                }
+            }
+            if good {
+                pending_partial = text.len();
+                self.tokenvec.advance(1);
+            }
+        }
+
+        assist.pend(self.tokenvec.pos() - self.valid_pos);
+        assist.set_next_options(NextOptions::Avail(assist.pending(), flatten));
+        (assist, pending_partial)
     }
 
     pub fn borrow_tracker<'b>(&'b mut self) -> deser::Tracker<'a, 'b> {

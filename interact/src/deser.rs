@@ -10,8 +10,8 @@ pub enum DeserError {
 }
 
 pub struct Tracker<'a, 'b> {
-    pub expect: &'b mut ExpectTree<Token<'static>>,
-    pub tokenvec: &'b mut TokenVec<'a>,
+    expect: &'b mut ExpectTree<Token<'static>>,
+    tokenvec: &'b mut TokenVec<'a>,
     steps: usize,
 }
 

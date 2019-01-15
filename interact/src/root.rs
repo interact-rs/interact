@@ -170,29 +170,9 @@ impl<'a, 'b> Root<'a, 'b> {
             Err(_) => {}
         }
 
-        // Convert the tokens-based Assist back to String-based assist
-        let mut old_assist = Assist::default();
-        old_assist.pend(climber.valid_pos);
-        old_assist.commit_pending();
-        let flatten = climber.expect.into_flatten();
-        let mut pending_partial = 0;
-        if !climber.tokenvec.is_empty() {
-            let text = &climber.tokenvec.top().text;
-            let mut good = !flatten.is_empty();
-            for opt in &flatten {
-                if !opt[0].text.starts_with(text.as_ref()) {
-                    good = false;
-                    break;
-                }
-            }
-            if good {
-                pending_partial = text.len();
-                climber.tokenvec.advance(1);
-            }
-        }
-        old_assist.pend(climber.tokenvec.pos() - climber.valid_pos);
-        old_assist.set_next_options(NextOptions::Avail(old_assist.pending(), flatten));
+        let (old_assist, pending_partial) = climber.convert_to_assist();
 
+        // Convert the tokens-based Assist back to String-based assist
         let mut new_assist = Assist::default();
 
         let (valid, pending, pending_special, next_options) = old_assist.dismantle();

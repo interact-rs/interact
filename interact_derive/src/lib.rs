@@ -315,7 +315,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
 
         let mut call_impl = quote! {
             <(#(#match_vec),*)>::deser(&mut _climber.borrow_tracker()).map(|(#(#arg_vec_ref),*)| {
-                if !_climber.probe_only {
+                if !_climber.is_probe_only() {
                     let _retval = self.#name_ident(#(#arg_vec_ref),*);
                     (_retcall)(&_retval, _climber);
                 }
@@ -325,7 +325,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
             if func.mutability == Mutability::ModifyAccess {
                 call_impl = quote! {
                     <(#(#match_vec),*)>::deser(&mut _climber.borrow_tracker()).map(|(#(#arg_vec_ref),*)| {
-                        if !_climber.probe_only {
+                        if !_climber.is_probe_only() {
                             // Non executing unsafe code only for coercing type checking
                             if false {
                                 let mself : &mut Self = unsafe { std::mem::uninitialized() };

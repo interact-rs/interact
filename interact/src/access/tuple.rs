@@ -75,7 +75,7 @@ macro_rules! tuple {
                 MutAccess::no_funcs(ReflectMut::Direct(self))
             }
 
-            mut_assign_suggest!();
+            mut_assign_deser!();
         }
     }
 }
@@ -146,7 +146,7 @@ where
         MutAccess::no_funcs(ReflectMut::Direct(self))
     }
 
-    mut_assign_suggest!();
+    mut_assign_deser!();
 }
 
 impl ReflectDirect for () {
@@ -183,7 +183,7 @@ impl Access for () {
         MutAccess::no_funcs(ReflectMut::Direct(self))
     }
 
-    mut_assign_suggest!();
+    mut_assign_deser!();
 }
 
 tuple!(2; {(A, 0), (B, 1)});

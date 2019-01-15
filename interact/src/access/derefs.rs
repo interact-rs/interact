@@ -39,7 +39,7 @@ where
         (*self).mut_access()
     }
 
-    mut_assign_suggest!();
+    mut_assign_deser!();
 }
 
 impl<T> Access for Box<T>
@@ -54,7 +54,7 @@ where
         self.deref_mut().mut_access()
     }
 
-    mut_assign_suggest!();
+    mut_assign_deser!();
 }
 
 impl<T> Access for Rc<T>
@@ -72,7 +72,7 @@ where
         }
     }
 
-    mut_assign_suggest!();
+    mut_assign_deser!();
 }
 
 impl<T> Access for Arc<T>
@@ -90,5 +90,5 @@ where
         }
     }
 
-    mut_assign_suggest!();
+    mut_assign_deser!();
 }

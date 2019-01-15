@@ -113,7 +113,7 @@ pub trait Access {
     }
 }
 
-macro_rules! mut_assign_suggest {
+macro_rules! mut_assign_deser {
     () => {
         fn mut_assign<'x, 'y>(
             &mut self,

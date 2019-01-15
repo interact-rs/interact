@@ -86,7 +86,7 @@ macro_rules! climber_impl {
             if let TokenInner::FieldAccess = &$self.tokenvec.top().inner {
                 $self.tokenvec.advance(1);
             } else {
-                $self.suggest_token(TokenInner::FieldAccess, Cow::Borrowed("."));
+                $self.expect_token(TokenInner::FieldAccess, Cow::Borrowed("."));
                 return Ok(None);
             }
 
@@ -100,7 +100,7 @@ macro_rules! climber_impl {
                 }
             }
         } else {
-            $self.suggest_token(TokenInner::FieldAccess, Cow::Borrowed("."));
+            $self.expect_token(TokenInner::FieldAccess, Cow::Borrowed("."));
         };
 
         match p_match {
@@ -120,7 +120,7 @@ macro_rules! climber_impl {
                                 ).map(Some)
                             }
                             if name.starts_with(prefix.as_str()) {
-                                $self.suggest_token(TokenInner::Ident, Cow::Owned(name));
+                                $self.expect_token(TokenInner::Ident, Cow::Owned(name));
                                 $self.expect.retract_one();
                             }
                         }
@@ -136,7 +136,7 @@ macro_rules! climber_impl {
                                 ).map(Some)
                             }
                             if name.starts_with(prefix.as_str()) {
-                                $self.suggest_token(TokenInner::Ident, Cow::Borrowed(name));
+                                $self.expect_token(TokenInner::Ident, Cow::Borrowed(name));
                                 $self.expect.retract_one();
                             }
                         }
@@ -162,7 +162,7 @@ macro_rules! climber_impl {
                     }
                 } else {
                     if desc.name.starts_with(prefix.as_str()) {
-                        $self.suggest_token(TokenInner::Ident, Cow::Borrowed(desc.name));
+                        $self.expect_token(TokenInner::Ident, Cow::Borrowed(desc.name));
                         $self.expect.retract_one();
                     }
                 }
@@ -194,14 +194,14 @@ macro_rules! climber_impl {
                 return Ok(None);
             }
         } else {
-            $self.suggest_token(TokenInner::FieldAccess, Cow::Borrowed("."));
+            $self.expect_token(TokenInner::FieldAccess, Cow::Borrowed("."));
         };
 
         for function in $functions {
             if function.name == prefix {
                 $self.tokenvec.advance(1);
                 if $self.tokenvec.is_empty() {
-                    $self.suggest_token(TokenInner::TupleOpen, Cow::Borrowed("("));
+                    $self.expect_token(TokenInner::TupleOpen, Cow::Borrowed("("));
                     return Ok(None);
                 }
 
@@ -242,8 +242,8 @@ macro_rules! climber_impl {
             }
 
             if function.name.starts_with(prefix.as_str()) {
-                $self.suggest_token(TokenInner::Ident, Cow::Borrowed(function.name));
-                $self.suggest_token(TokenInner::TupleOpen, Cow::Borrowed("("));
+                $self.expect_token(TokenInner::Ident, Cow::Borrowed(function.name));
+                $self.expect_token(TokenInner::TupleOpen, Cow::Borrowed("("));
                 $self.expect.retract_one();
                 $self.expect.retract_one();
             }
@@ -476,7 +476,7 @@ impl<'a> Climber<'a> {
                       EnumOrStructMut, self, reflect)
     }
 
-    fn suggest_token(&mut self, inner: TokenInner, text: Cow<'static, str>) {
+    fn expect_token(&mut self, inner: TokenInner, text: Cow<'static, str>) {
         self.expect.advance(Token {
             inner,
             space_diff: 0,
@@ -531,7 +531,7 @@ impl<'a> Climber<'a> {
 
     pub fn open_bracket(&mut self) -> bool {
         if self.tokenvec.is_empty() {
-            self.suggest_token(TokenInner::SubscriptOpen, Cow::Borrowed("["));
+            self.expect_token(TokenInner::SubscriptOpen, Cow::Borrowed("["));
             return false;
         }
 
@@ -545,7 +545,7 @@ impl<'a> Climber<'a> {
 
     pub fn close_bracket(&mut self) -> Result<(), ClimbError> {
         if self.tokenvec.is_empty() {
-            self.suggest_token(TokenInner::TupleClose, Cow::Borrowed("]"));
+            self.expect_token(TokenInner::TupleClose, Cow::Borrowed("]"));
             return Err(ClimbError::UnexpectedExpressionEnd);
         }
 

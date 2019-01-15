@@ -17,9 +17,8 @@ use crate::util::always_equal::AlwaysEqual;
 type ObjPtr = (usize, usize);
 
 pub struct Reflector {
-    pub limit: usize,
-    pub items: AtomicUsize,
-    pub used: AtomicUsize,
+    limit: usize,
+    used: AtomicUsize,
 
     seen: Mutex<HashMap<ObjPtr, PtrMeta>>,
     synced_thread: ThreadId,
@@ -30,7 +29,6 @@ impl Reflector {
         Arc::new(Self {
             limit,
             used: AtomicUsize::new(0),
-            items: AtomicUsize::new(1),
             seen: Mutex::new(HashMap::new()),
             synced_thread: std::thread::current().id(),
         })

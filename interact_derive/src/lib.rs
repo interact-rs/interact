@@ -402,7 +402,7 @@ fn impls_for_access(input: &DeriveInput, mut mut_assign: bool) -> Tokens {
                 _tracker: &mut deser::Tracker<'a, 'b>,
                 _probe_only: bool,
             ) -> Result<(), AssignError> {
-                suggest_assign(self, _tracker, _probe_only)
+                deser_assign(self, _tracker, _probe_only)
             }
         }
     } else {

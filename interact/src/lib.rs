@@ -74,7 +74,7 @@ pub mod access;
 pub use crate::access::{
     derive::{Enum, ReflectEnum, ReflectStruct, Struct, StructKind},
     iter::ReflectIter,
-    suggest_assign, Access, AssignError, CallError, Function, ImmutAccess, MutAccess, Reflect,
+    deser_assign, Access, AssignError, CallError, Function, ImmutAccess, MutAccess, Reflect,
     ReflectDirect, ReflectIndirect, ReflectMut, RetValCallback,
 };
 

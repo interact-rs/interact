@@ -120,12 +120,12 @@ macro_rules! mut_assign_suggest {
             tracker: &mut deser::Tracker<'x, 'y>,
             probe_only: bool,
         ) -> Result<(), AssignError> {
-            crate::access::suggest_assign(self, tracker, probe_only)
+            crate::access::deser_assign(self, tracker, probe_only)
         }
     }
 }
 
-pub fn suggest_assign<'a, 'b, T: Deser>(
+pub fn deser_assign<'a, 'b, T: Deser>(
     dest: &mut T,
     tracker: &mut deser::Tracker<'a, 'b>,
     probe_only: bool,

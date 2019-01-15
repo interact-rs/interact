@@ -75,8 +75,6 @@ pub enum AssignError {
 pub enum CallError {
     Deser(deser::DeserError),
     NeedMutable,
-
-    UnxpectedToken,
     NoSuchFunction,
 }
 

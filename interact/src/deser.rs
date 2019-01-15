@@ -1,7 +1,7 @@
 use crate::{ExpectTree, Token, TokenInner, TokenVec};
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub enum Error {
+pub enum DeserError {
     EndOfTokenList,
     NumberTooLarge,
     NumberTooSmall,
@@ -15,7 +15,7 @@ pub struct Tracker<'a, 'b> {
     steps: usize,
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = std::result::Result<T, DeserError>;
 
 impl<'a, 'b> Tracker<'a, 'b> {
     pub fn new(expect: &'b mut ExpectTree<Token<'static>>, tokenvec: &'b mut TokenVec<'a>) -> Self {
@@ -52,7 +52,7 @@ impl<'a, 'b> Tracker<'a, 'b> {
             self.expect.advance(token.clone());
             Ok(false)
         } else {
-            Err(Error::UnexpectedToken)
+            Err(DeserError::UnexpectedToken)
         }
     }
 
@@ -73,7 +73,7 @@ impl<'a, 'b> Tracker<'a, 'b> {
 
 pub trait Deser: Sized {
     fn deser<'a, 'b>(_tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
-        return Err(Error::Unbuildable);
+        return Err(DeserError::Unbuildable);
     }
 }
 

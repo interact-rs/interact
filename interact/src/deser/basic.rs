@@ -1,4 +1,4 @@
-use crate::deser::{Deser, Error, Result, Tracker};
+use crate::deser::{Deser, DeserError, Result, Tracker};
 use crate::tokens::{Token, TokenInner};
 
 macro_rules! impl_unsigned {
@@ -6,12 +6,12 @@ macro_rules! impl_unsigned {
         impl Deser for $a {
             fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
                 if !tracker.has_remaining() {
-                    return Err(Error::EndOfTokenList);
+                    return Err(DeserError::EndOfTokenList);
                 }
 
                 if let TokenInner::NonNegativeDecimal(nnd) = tracker.top().inner {
                     if nnd > u64::from(Self::max_value()) {
-                        return Err(Error::NumberTooLarge);
+                        return Err(DeserError::NumberTooLarge);
                     }
 
                     tracker.step();
@@ -19,17 +19,17 @@ macro_rules! impl_unsigned {
                 }
                 if let TokenInner::Decimal(nnd) = tracker.top().inner {
                     if nnd < 0 {
-                        return Err(Error::NumberTooSmall);
+                        return Err(DeserError::NumberTooSmall);
                     }
                     if nnd as u64 > u64::from(Self::max_value()) {
-                        return Err(Error::NumberTooLarge);
+                        return Err(DeserError::NumberTooLarge);
                     }
 
                     tracker.step();
                     return Ok(nnd as Self);
                 }
 
-                Err(Error::UnexpectedToken)
+                Err(DeserError::UnexpectedToken)
             }
         }
     };
@@ -45,28 +45,28 @@ macro_rules! impl_signed {
         impl Deser for $a {
             fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
                 if !tracker.has_remaining() {
-                    return Err(Error::EndOfTokenList);
+                    return Err(DeserError::EndOfTokenList);
                 }
 
                 if let TokenInner::NonNegativeDecimal(nnd) = tracker.top().inner {
                     if nnd >= Self::max_value() as u64 {
-                        return Err(Error::NumberTooLarge);
+                        return Err(DeserError::NumberTooLarge);
                     }
                     tracker.step();
                     return Ok(nnd as Self);
                 } else if let TokenInner::Decimal(dec) = tracker.top().inner {
                     if dec < Self::min_value() as i64 {
-                        return Err(Error::NumberTooSmall);
+                        return Err(DeserError::NumberTooSmall);
                     }
                     if dec > Self::max_value() as i64 {
-                        return Err(Error::NumberTooLarge);
+                        return Err(DeserError::NumberTooLarge);
                     }
 
                     tracker.step();
                     return Ok(dec as Self);
                 }
 
-                Err(Error::UnexpectedToken)
+                Err(DeserError::UnexpectedToken)
             }
         }
     };
@@ -81,12 +81,12 @@ impl_signed!(i8);
 impl Deser for usize {
     fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
         if !tracker.has_remaining() {
-            return Err(Error::EndOfTokenList);
+            return Err(DeserError::EndOfTokenList);
         }
 
         if let TokenInner::NonNegativeDecimal(nnd) = tracker.top().inner {
             if nnd > Self::max_value() as u64 {
-                return Err(Error::NumberTooLarge);
+                return Err(DeserError::NumberTooLarge);
             }
 
             tracker.step();
@@ -94,17 +94,17 @@ impl Deser for usize {
         }
         if let TokenInner::Decimal(nnd) = tracker.top().inner {
             if nnd < 0 {
-                return Err(Error::NumberTooSmall);
+                return Err(DeserError::NumberTooSmall);
             }
             if nnd as u64 > Self::max_value() as u64 {
-                return Err(Error::NumberTooLarge);
+                return Err(DeserError::NumberTooLarge);
             }
 
             tracker.step();
             return Ok(nnd as Self);
         }
 
-        Err(Error::UnexpectedToken)
+        Err(DeserError::UnexpectedToken)
     }
 }
 
@@ -113,7 +113,7 @@ macro_rules! impl_simple {
         impl Deser for $a {
             fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
                 if !tracker.has_remaining() {
-                    return Err(Error::EndOfTokenList);
+                    return Err(DeserError::EndOfTokenList);
                 }
 
                 if let TokenInner::$token(s) = &tracker.top().inner {
@@ -122,7 +122,7 @@ macro_rules! impl_simple {
                     return Ok(s);
                 }
 
-                Err(Error::UnexpectedToken)
+                Err(DeserError::UnexpectedToken)
             }
         }
     };
@@ -139,7 +139,7 @@ impl Deser for bool {
             for (s, _) in values.iter() {
                 tracker.possible_token(Token::new_borrowed(TokenInner::Ident, s));
             }
-            return Err(Error::EndOfTokenList);
+            return Err(DeserError::EndOfTokenList);
         }
 
         if let TokenInner::Ident = tracker.top().inner {
@@ -157,6 +157,6 @@ impl Deser for bool {
             }
         }
 
-        Err(Error::UnexpectedToken)
+        Err(DeserError::UnexpectedToken)
     }
 }

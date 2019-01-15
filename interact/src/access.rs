@@ -64,7 +64,7 @@ pub enum ReflectMut<'a> {
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum AssignError {
-    Exact(deser::Error),
+    Deser(deser::DeserError),
 
     // Some types, having ignored fields, will be unbuildable.
     Unbuildable,
@@ -73,7 +73,7 @@ pub enum AssignError {
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub enum CallError {
-    Exact(deser::Error),
+    Deser(deser::DeserError),
     NeedMutable,
 
     UnxpectedToken,
@@ -137,7 +137,7 @@ pub fn deser_assign<'a, 'b, T: Deser>(
             }
             Ok(())
         }
-        Err(e) => Err(AssignError::Exact(e)),
+        Err(e) => Err(AssignError::Deser(e)),
     }
 }
 

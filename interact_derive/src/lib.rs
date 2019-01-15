@@ -319,7 +319,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
                     let _retval = self.#name_ident(#(#arg_vec_ref),*);
                     (_retcall)(&_retval, _climber);
                 }
-            }).map_err(CallError::Exact)
+            }).map_err(CallError::Deser)
         };
         if mutability == Mutability::ReadAccess {
             if func.mutability == Mutability::ModifyAccess {
@@ -332,7 +332,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
                                 let _ = mself.#name_ident(#(#arg_vec_ref),*);
                             }
                         }
-                    }).map_err(CallError::Exact)?;
+                    }).map_err(CallError::Deser)?;
 
                     return Err(CallError::NeedMutable);
                 };
@@ -848,7 +848,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                 if is_skipped(&field.attrs) {
                     return (
                         quote! {
-                            return Err(deser::Error::Unbuildable);
+                            return Err(deser::DeserError::Unbuildable);
                         },
                         false,
                     );
@@ -864,7 +864,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                 match_arms_2.push(quote! {
                     Some(#ident_str) => {
                         if #ident_name.is_some() {
-                            return Err(deser::Error::Unbuildable);
+                            return Err(deser::DeserError::Unbuildable);
                         }
                         tracker.step();
                         tracker.try_token(&_colon)?;
@@ -896,7 +896,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                                 tracker.possible_token(
                                     Token::new_borrowed(TokenInner::Ident, *name));
                             }
-                            return Err(deser::Error::EndOfTokenList);
+                            return Err(deser::DeserError::EndOfTokenList);
                         }
                         if let TokenInner::Ident = tracker.top().inner {
                             let opt = {
@@ -920,7 +920,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                                                     TokenInner::Ident, *name));
                                         }
                                     }
-                                    return Err(deser::Error::UnexpectedToken);
+                                    return Err(deser::DeserError::UnexpectedToken);
                                 }
                             }
                             __expecting -= 1;
@@ -930,7 +930,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                                 tracker.try_token(&_comma)?;
                             }
                         } else {
-                            return Err(deser::Error::UnexpectedToken);
+                            return Err(deser::DeserError::UnexpectedToken);
                         }
                     }
                 }
@@ -963,7 +963,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                 if is_skipped(&field.attrs) {
                     return (
                         quote! {
-                            return Err(deser::Error::Unbuildable);
+                            return Err(deser::DeserError::Unbuildable);
                         },
                         false,
                     );
@@ -1062,7 +1062,7 @@ fn impls_for_deser(kr: &Tokens, input: &DeriveInput, info: &DeriveInfo) -> (bool
                             tracker.possible_token(
                                 Token::new_borrowed(TokenInner::Ident, *name));
                         }
-                        return Err(deser::Error::EndOfTokenList);
+                        return Err(deser::DeserError::EndOfTokenList);
                     }
                     if let TokenInner::Ident = tracker.top().inner {
                         let text = tracker.top().text.as_ref();
@@ -1077,11 +1077,11 @@ fn impls_for_deser(kr: &Tokens, input: &DeriveInput, info: &DeriveInfo) -> (bool
                                                 TokenInner::Ident, *name));
                                     }
                                 }
-                                return Err(deser::Error::UnexpectedToken);
+                                return Err(deser::DeserError::UnexpectedToken);
                             }
                         }
                     } else {
-                        return Err(deser::Error::UnexpectedToken);
+                        return Err(deser::DeserError::UnexpectedToken);
                     }
                 },
                 true,

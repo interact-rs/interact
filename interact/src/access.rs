@@ -80,10 +80,20 @@ pub enum CallError {
 
 pub type RetValCallback<'a> = Box<FnMut(&dyn Access, &mut Climber<'a>)>;
 
+/// The `Access` trait, meant to be used as a trait objects provides methods that
+/// dynamically expose read&write access to the underlying objects.
 pub trait Access {
+    /// Expose an immmutable accessor, used when `Access` is immutable or mutable.
     fn immut_access(&self) -> ImmutAccess;
+
+    /// Expose a mutable accessor, used when `Access` is mutable.
     fn mut_access(&mut self) -> MutAccess;
 
+    /// Perform an optional method call for a certain function, with the return value provided to
+    /// the callback. The arguments are parsed from the Token tracker in the Climber parameter.
+    ///
+    /// Depending on the state of the Climber, we may just parsing the arguments not not actually
+    /// calling the function, in order to provide user feedback.
     fn immut_call<'a>(
         &self,
         _func_name: &'static str,
@@ -93,6 +103,12 @@ pub trait Access {
         Err(CallError::NoSuchFunction)
     }
 
+    /// Perform an optional method call for a certain function which may modify the underlying
+    /// value, with the return value provided to the callback. The arguments are parsed from the
+    /// Token tracker in the Climber parameter.
+    ///
+    /// Depending on the state of the Climber, we may just parsing the arguments not not actually
+    /// calling the function, in order to provide user feedback.
     fn mut_call<'a>(
         &mut self,
         _func_name: &'static str,
@@ -102,6 +118,9 @@ pub trait Access {
         Err(CallError::NoSuchFunction)
     }
 
+    /// Assign a new value to this object. `probe_only` determines whether the implementation would
+    /// only parse the new value and not actually assign it. This is in order to provide user
+    /// feedback for the parsing bits.
     fn mut_assign<'a, 'b>(
         &mut self,
         _tokens: &mut deser::Tracker<'a, 'b>,
@@ -123,6 +142,7 @@ macro_rules! mut_assign_deser {
     }
 }
 
+/// A helper for the specific implementations of `Access` to use with `mut_assign` methods
 pub fn deser_assign<'a, 'b, T: Deser>(
     dest: &mut T,
     tracker: &mut deser::Tracker<'a, 'b>,

@@ -30,6 +30,7 @@ pub enum TokenInner {
     FieldAccess,
     Assign,
     Colon,
+    Asterix,
     Char(char),
     String(String),
     Range(bool),
@@ -215,6 +216,7 @@ pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
             Rule::curly_close => TokenInner::CurlyClose,
             Rule::comma => TokenInner::Comma,
             Rule::colon => TokenInner::Colon,
+            Rule::asterix => TokenInner::Asterix,
             Rule::char_literal => {
                 TokenInner::Char({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
             }

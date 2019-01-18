@@ -328,6 +328,9 @@ impl<'a> Climber<'a> {
             if let TokenInner::Assign = &self.tokenvec.top().inner {
                 return Err(ClimbError::NeedMutPath);
             }
+            if let TokenInner::Asterix = &self.tokenvec.top().inner {
+                self.tokenvec.advance(1);
+            }
         }
 
         let immut_access = dynvalue.immut_access();
@@ -385,6 +388,9 @@ impl<'a> Climber<'a> {
                     }
                     Err(e) => Err(ClimbError::AssignError(e)),
                 };
+            }
+            if let TokenInner::Asterix = &self.tokenvec.top().inner {
+                self.tokenvec.advance(1);
             }
         }
 

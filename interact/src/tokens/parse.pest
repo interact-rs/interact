@@ -15,6 +15,7 @@ token = _{
     | tuple_close
     | curly_open
     | curly_close
+    | asterix
     | colon
     | assign
     | comma
@@ -34,6 +35,8 @@ range_access_inclusive = { ".=" }
 
 subscript_open         = { "[" }
 subscript_close        = { "]" }
+
+asterix                = { "*" }
 
 curly_open             = { "{" }
 curly_close            = { "}" }

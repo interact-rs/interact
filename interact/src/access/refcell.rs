@@ -32,5 +32,6 @@ where
 use interact_derive::derive_interact_opaque;
 
 derive_interact_opaque! {
+    #[interact(mut_assign)]
     struct RefCell<T>;
 }

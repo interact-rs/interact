@@ -3,21 +3,41 @@ use std::sync::Arc;
 use crate::deser::Deser;
 use crate::{deser, ClimbError, Climber, NodeTree, Reflector};
 
+/// The indirect Reflect allows indirect climber or reflector access, and meant to be used as a
+/// trait object for that purpose.
+///
+/// It is expected that the provided callback would be called at this or some other thread in order
+/// to continue traversal of the access expression. For example, if a processes uses internal message
+/// passing, the traversal can continue upon message reception.
 pub trait ReflectIndirect {
+    /// Provides indirection for immutable access.
     fn indirect(&self, fnc: Box<FnMut(&dyn Access) + Send>);
+
+    /// Provides indirection for mutable access.
     fn indirect_mut(&mut self, fnc: Box<FnMut(&mut dyn Access) + Send>);
 }
 
+/// The direct Reflect allows direct climber or reflector access, and meant
+/// to be used as a trait object for that purpose.
 pub trait ReflectDirect {
+    /// The specific implementation of the following method will mostly likely call
+    /// Reflector::reflect with the specific type.
     fn immut_reflector(&self, _reflector: &Arc<Reflector>) -> NodeTree;
+
+    /// Implement climbing for the specific type. Returns a reflection of the inner value,
+    /// depending on the expression remaining to parse.
     fn immut_climber<'a>(&self, _climber: &mut Climber<'a>)
         -> Result<Option<NodeTree>, ClimbError>;
+
+    /// Implement mutable climbing for the specific type, allowing to modifying it.
+    /// Returns a reflection of the inner value, depending on the expression remaining to parse.
     fn mut_climber<'a>(
         &mut self,
         _climber: &mut Climber<'a>,
     ) -> Result<Option<NodeTree>, ClimbError>;
 }
 
+/// An arbitrar between the two possible way to climb into a value.
 pub enum Reflect<'a> {
     Indirect(&'a dyn ReflectIndirect),
     Direct(&'a dyn ReflectDirect),
@@ -28,6 +48,7 @@ pub struct Function {
     pub args: &'static [&'static str],
 }
 
+/// MutAccess adds function call information over ReflectMut.
 pub struct MutAccess<'a> {
     pub reflect: ReflectMut<'a>,
     pub functions: &'static [Function],
@@ -42,6 +63,7 @@ impl<'a> MutAccess<'a> {
     }
 }
 
+/// ImmutAccess adds function call information over Reflect.
 pub struct ImmutAccess<'a> {
     pub reflect: Reflect<'a>,
     pub functions: &'static [Function],

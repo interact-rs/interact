@@ -1,3 +1,14 @@
+/// Token parser for Interact input.
+///
+/// Behind the scenes, we would like to perform parsing of certain types of expressions, mainly for
+/// the purpose of data access. The most common type of data access is dereferences of a struct
+/// field, i.e., `.field`. Others, include map indexing `["value"]`, so we only need a certain
+/// subset of Rust tokens.
+///
+/// However, to make implementation easier, we only do basic splitting of tokens here using `pest`,
+/// and for the basic types, allow `ron` to do a more in depth resolve of the basic Rust types
+/// into the actual values.
+
 #[derive(Parser)]
 #[grammar = "tokens/parse.pest"]
 pub struct ExprParser;
@@ -28,8 +39,13 @@ pub enum TokenInner {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Token<'a> {
+    /// Token kind
     pub inner: TokenInner,
+
+    /// Token text
     pub text: Cow<'a, str>,
+
+    /// Amount of whitespace from the previous token
     pub space_diff: usize,
 }
 
@@ -58,6 +74,7 @@ impl<'a> Token<'a> {
         }
     }
 
+    /// Returns whether two tokens are idential with whitespace removed.
     pub fn similar(&self, token: &Token) -> bool {
         if self.inner != token.inner {
             return false;
@@ -68,6 +85,7 @@ impl<'a> Token<'a> {
         a.next() == b.next()
     }
 
+    /// Returns whether one token is a prefix or another.
     pub fn is_prefix_of(&self, token: &Token) -> bool {
         if self.inner != token.inner {
             return false;
@@ -76,12 +94,14 @@ impl<'a> Token<'a> {
         token.text.starts_with(self.text.as_ref())
     }
 
+    /// Return the amount of space following the text of the token.
     pub fn space_suffix(&self) -> usize {
         let mut a = self.text.split_whitespace();
         self.text.len() - a.next().unwrap().len()
     }
 }
 
+/// Wrapper for the traversal of a borrowed list of tokens.
 #[derive(Debug, Clone)]
 pub struct TokenVec<'a> {
     tokens: Cow<'a, [Token<'a>]>,
@@ -163,6 +183,7 @@ pub enum Error {
     RonError(ron::de::Error),
 }
 
+/// Parse a string into a vector of tokens.
 pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
     let mut vec = vec![];
 

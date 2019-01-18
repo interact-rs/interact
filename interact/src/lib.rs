@@ -73,9 +73,10 @@ pub use crate::reflector::Reflector;
 pub mod access;
 pub use crate::access::{
     derive::{Enum, ReflectEnum, ReflectStruct, Struct, StructKind},
+    deser_assign,
     iter::ReflectIter,
-    deser_assign, Access, AssignError, CallError, Function, ImmutAccess, MutAccess, Reflect,
-    ReflectDirect, ReflectIndirect, ReflectMut, RetValCallback,
+    Access, AssignError, CallError, Function, ImmutAccess, MutAccess, Reflect, ReflectDirect,
+    ReflectIndirect, ReflectMut, RetValCallback,
 };
 
 // #derive

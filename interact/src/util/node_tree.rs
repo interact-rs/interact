@@ -1,4 +1,3 @@
-use crate::util::always_equal::AlwaysEqual;
 use std::borrow::Cow;
 use std::io::Cursor;
 use std::io::Write;
@@ -9,14 +8,14 @@ use std::sync::Arc;
 
 type Delimiter = char;
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum NodeInfo {
     Grouped(char, Box<NodeTree>, char),
     Delimited(Delimiter, Vec<NodeTree>),
     Named(Box<NodeTree>, Box<NodeTree>),
     Tuple(Box<NodeTree>, &'static str, Box<NodeTree>),
     Leaf(Cow<'static, str>),
-    Hole(Box<AlwaysEqual<Receiver<NodeTree>>>),
+    Hole(Box<Receiver<NodeTree>>),
     BorrowedMut,
     Locked,
     Repeated,
@@ -28,7 +27,7 @@ pub type PtrMeta = Arc<AtomicUsize>;
 #[derive(Debug)]
 pub struct Wrap(pub PtrMeta);
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub struct NodeTree {
     pub info: NodeInfo,
     pub meta: Option<Wrap>,
@@ -193,7 +192,7 @@ impl NodeTree {
                     count += v.len();
                     None
                 }
-                Hole(receiver) => Some((*receiver).0.recv().unwrap()),
+                Hole(receiver) => Some((*receiver).recv().unwrap()),
                 Limited => None,
                 Repeated => None,
                 BorrowedMut => None,

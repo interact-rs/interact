@@ -12,7 +12,6 @@ use crate::access::{
     Access,
 };
 use crate::node_tree::{NodeInfo, NodeTree, PtrMeta, Wrap};
-use crate::util::always_equal::AlwaysEqual;
 
 type ObjPtr = (usize, usize);
 
@@ -263,7 +262,7 @@ impl Reflector {
                 if a_self.synced_thread == std::thread::current().id() {
                     receiver.recv().unwrap()
                 } else {
-                    NodeInfo::Hole(Box::new(AlwaysEqual(receiver))).into_node()
+                    NodeInfo::Hole(Box::new(receiver)).into_node()
                 }
             }
         };

@@ -17,7 +17,7 @@ use std::borrow::Cow;
 use pest::Parser;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum TokenInner {
+pub enum TokenKind {
     Ident,
     NonNegativeDecimal(u64),
     Decimal(i64),
@@ -42,7 +42,7 @@ pub enum TokenInner {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Token<'a> {
     /// Token kind
-    pub inner: TokenInner,
+    pub kind: TokenKind,
 
     /// Token text
     pub text: Cow<'a, str>,
@@ -54,15 +54,15 @@ pub struct Token<'a> {
 impl<'a> Token<'a> {
     pub fn new_owned(s: String) -> Self {
         Token {
-            inner: TokenInner::Ident,
+            kind: TokenKind::Ident,
             text: Cow::Owned(s),
             space_diff: 0,
         }
     }
 
-    pub fn new_borrowed(inner: TokenInner, s: &'static str) -> Self {
+    pub fn new_borrowed(kind: TokenKind, s: &'static str) -> Self {
         Token {
-            inner,
+            kind,
             text: Cow::from(s),
             space_diff: 0,
         }
@@ -70,7 +70,7 @@ impl<'a> Token<'a> {
 
     pub fn clone_owned(&self) -> Token<'static> {
         Token {
-            inner: self.inner.clone(),
+            kind: self.kind.clone(),
             text: Cow::Owned(String::from(self.text.as_ref())),
             space_diff: self.space_diff,
         }
@@ -78,7 +78,7 @@ impl<'a> Token<'a> {
 
     /// Returns whether two tokens are idential with whitespace removed.
     pub fn similar(&self, token: &Token) -> bool {
-        if self.inner != token.inner {
+        if self.kind != token.kind {
             return false;
         }
 
@@ -89,7 +89,7 @@ impl<'a> Token<'a> {
 
     /// Returns whether one token is a prefix or another.
     pub fn is_prefix_of(&self, token: &Token) -> bool {
-        if self.inner != token.inner {
+        if self.kind != token.kind {
             return false;
         }
 
@@ -162,6 +162,10 @@ impl<'a> TokenVec<'a> {
         &self.tokens[self.pos]
     }
 
+    pub fn top_kind(&self) -> &TokenKind {
+        &self.tokens[self.pos].kind
+    }
+
     pub fn len(&self) -> usize {
         self.tokens.len()
     }
@@ -197,35 +201,35 @@ pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
         let mut stop = false;
 
         let token_inner = match pair.as_rule() {
-            Rule::identifier => TokenInner::Ident,
+            Rule::identifier => TokenKind::Ident,
             Rule::nonnegative_decimal => {
-                TokenInner::NonNegativeDecimal({ span.as_str().parse().map_err(Error::IntError)? })
+                TokenKind::NonNegativeDecimal({ span.as_str().parse().map_err(Error::IntError)? })
             }
             Rule::decimal => {
-                TokenInner::Decimal({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
+                TokenKind::Decimal({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
             }
             Rule::invalid => {
                 stop = true;
-                TokenInner::InvalidToken
+                TokenKind::InvalidToken
             }
-            Rule::field_access => TokenInner::FieldAccess,
-            Rule::subscript_open => TokenInner::SubscriptOpen,
-            Rule::subscript_close => TokenInner::SubscriptClose,
-            Rule::tuple_open => TokenInner::TupleOpen,
-            Rule::tuple_close => TokenInner::TupleClose,
-            Rule::curly_open => TokenInner::CurlyOpen,
-            Rule::curly_close => TokenInner::CurlyClose,
-            Rule::comma => TokenInner::Comma,
-            Rule::colon => TokenInner::Colon,
-            Rule::asterix => TokenInner::Asterix,
+            Rule::field_access => TokenKind::FieldAccess,
+            Rule::subscript_open => TokenKind::SubscriptOpen,
+            Rule::subscript_close => TokenKind::SubscriptClose,
+            Rule::tuple_open => TokenKind::TupleOpen,
+            Rule::tuple_close => TokenKind::TupleClose,
+            Rule::curly_open => TokenKind::CurlyOpen,
+            Rule::curly_close => TokenKind::CurlyClose,
+            Rule::comma => TokenKind::Comma,
+            Rule::colon => TokenKind::Colon,
+            Rule::asterix => TokenKind::Asterix,
             Rule::char_literal => {
-                TokenInner::Char({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
+                TokenKind::Char({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
             }
-            Rule::assign => TokenInner::Assign,
-            Rule::range_access => TokenInner::Range(false),
-            Rule::range_access_inclusive => TokenInner::Range(true),
+            Rule::assign => TokenKind::Assign,
+            Rule::range_access => TokenKind::Range(false),
+            Rule::range_access_inclusive => TokenKind::Range(true),
             Rule::string_literal => {
-                TokenInner::String({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
+                TokenKind::String({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
             }
             Rule::underscore
             | Rule::alpha
@@ -245,7 +249,7 @@ pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
         };
 
         vec.push(Token {
-            inner: token_inner,
+            kind: token_inner,
             text: Cow::Borrowed(span.as_str()),
             space_diff: span.start() - last_end,
         });

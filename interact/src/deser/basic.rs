@@ -1,5 +1,5 @@
 use crate::deser::{Deser, DeserError, Result, Tracker};
-use crate::tokens::{Token, TokenInner};
+use crate::tokens::{Token, TokenKind};
 
 macro_rules! impl_unsigned {
     ($a:tt) => {
@@ -9,7 +9,8 @@ macro_rules! impl_unsigned {
                     return Err(DeserError::EndOfTokenList);
                 }
 
-                if let TokenInner::NonNegativeDecimal(nnd) = tracker.top().inner {
+                if let TokenKind::NonNegativeDecimal(nnd) = tracker.top_kind() {
+                    let nnd = nnd.clone();
                     if nnd > u64::from(Self::max_value()) {
                         return Err(DeserError::NumberTooLarge);
                     }
@@ -17,7 +18,8 @@ macro_rules! impl_unsigned {
                     tracker.step();
                     return Ok(nnd as Self);
                 }
-                if let TokenInner::Decimal(nnd) = tracker.top().inner {
+                if let TokenKind::Decimal(nnd) = tracker.top_kind() {
+                    let nnd = nnd.clone();
                     if nnd < 0 {
                         return Err(DeserError::NumberTooSmall);
                     }
@@ -48,13 +50,15 @@ macro_rules! impl_signed {
                     return Err(DeserError::EndOfTokenList);
                 }
 
-                if let TokenInner::NonNegativeDecimal(nnd) = tracker.top().inner {
+                if let TokenKind::NonNegativeDecimal(nnd) = tracker.top_kind() {
+                    let nnd = nnd.clone();
                     if nnd >= Self::max_value() as u64 {
                         return Err(DeserError::NumberTooLarge);
                     }
                     tracker.step();
                     return Ok(nnd as Self);
-                } else if let TokenInner::Decimal(dec) = tracker.top().inner {
+                } else if let TokenKind::Decimal(dec) = tracker.top_kind() {
+                    let dec = dec.clone();
                     if dec < Self::min_value() as i64 {
                         return Err(DeserError::NumberTooSmall);
                     }
@@ -84,7 +88,8 @@ impl Deser for usize {
             return Err(DeserError::EndOfTokenList);
         }
 
-        if let TokenInner::NonNegativeDecimal(nnd) = tracker.top().inner {
+        if let TokenKind::NonNegativeDecimal(nnd) = tracker.top_kind() {
+            let nnd = nnd.clone();
             if nnd > Self::max_value() as u64 {
                 return Err(DeserError::NumberTooLarge);
             }
@@ -92,7 +97,8 @@ impl Deser for usize {
             tracker.step();
             return Ok(nnd as Self);
         }
-        if let TokenInner::Decimal(nnd) = tracker.top().inner {
+        if let TokenKind::Decimal(nnd) = tracker.top_kind() {
+            let nnd = nnd.clone();
             if nnd < 0 {
                 return Err(DeserError::NumberTooSmall);
             }
@@ -116,7 +122,7 @@ macro_rules! impl_simple {
                     return Err(DeserError::EndOfTokenList);
                 }
 
-                if let TokenInner::$token(s) = &tracker.top().inner {
+                if let TokenKind::$token(s) = tracker.top_kind() {
                     let s = s.clone();
                     tracker.step();
                     return Ok(s);
@@ -137,12 +143,12 @@ impl Deser for bool {
 
         if !tracker.has_remaining() {
             for (s, _) in values.iter() {
-                tracker.possible_token(Token::new_borrowed(TokenInner::Ident, s));
+                tracker.possible_token(Token::new_borrowed(TokenKind::Ident, s));
             }
             return Err(DeserError::EndOfTokenList);
         }
 
-        if let TokenInner::Ident = tracker.top().inner {
+        if let TokenKind::Ident = tracker.top_kind() {
             for (s, value) in values.iter() {
                 if *s == tracker.top().text {
                     tracker.step();
@@ -152,7 +158,7 @@ impl Deser for bool {
 
             for (s, _) in values.iter() {
                 if s.starts_with(tracker.top().text.as_ref()) {
-                    tracker.possible_token(Token::new_borrowed(TokenInner::Ident, s));
+                    tracker.possible_token(Token::new_borrowed(TokenKind::Ident, s));
                 }
             }
         }

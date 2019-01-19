@@ -1,4 +1,4 @@
-use crate::{ExpectTree, Token, TokenInner, TokenVec};
+use crate::{ExpectTree, Token, TokenKind, TokenVec};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum DeserError {
@@ -35,7 +35,7 @@ impl<'a, 'b> Tracker<'a, 'b> {
         if !self.tokenvec.has_remaining() {
             let mut token = token.clone();
             if let Some(last) = self.expect.last() {
-                if let TokenInner::Comma = &last.inner {
+                if let TokenKind::Comma = &last.kind {
                     if last.space_suffix() == 0 {
                         token.space_diff += 1;
                     }
@@ -62,6 +62,10 @@ impl<'a, 'b> Tracker<'a, 'b> {
 
     pub fn top(&self) -> &Token<'a> {
         self.tokenvec.top()
+    }
+
+    pub fn top_kind(&self) -> &TokenKind {
+        &self.top().kind
     }
 
     pub fn step(&mut self) {

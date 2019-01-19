@@ -850,7 +850,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
         quote! {}
     } else {
         quote! {
-            let _name = Token::new_borrowed(TokenInner::Ident, #name_str);
+            let _name = Token::new_borrowed(TokenKind::Ident, #name_str);
             tracker.try_token(&_name)?;
         }
     };
@@ -913,11 +913,11 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                                     continue;
                                 }
                                 tracker.possible_token(
-                                    Token::new_borrowed(TokenInner::Ident, *name));
+                                    Token::new_borrowed(TokenKind::Ident, *name));
                             }
                             return Err(deser::DeserError::EndOfTokenList);
                         }
-                        if let TokenInner::Ident = tracker.top().inner {
+                        if let TokenKind::Ident = tracker.top_kind() {
                             let opt = {
                                 let text = tracker.top().text.as_ref();
                                 match text {
@@ -936,7 +936,7 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                                         if name.starts_with(&text) {
                                             tracker.possible_token(
                                                 Token::new_borrowed(
-                                                    TokenInner::Ident, *name));
+                                                    TokenKind::Ident, *name));
                                         }
                                     }
                                     return Err(deser::DeserError::UnexpectedToken);
@@ -961,10 +961,10 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
 
             (
                 quote! {
-                    let _curly_open = Token::new_borrowed(TokenInner::CurlyOpen, " {");
-                    let _curly_close = Token::new_borrowed(TokenInner::CurlyClose, "}");
-                    let _comma = Token::new_borrowed(TokenInner::Comma, ", ");
-                    let _colon = Token::new_borrowed(TokenInner::Colon, ": ");
+                    let _curly_open = Token::new_borrowed(TokenKind::CurlyOpen, " {");
+                    let _curly_close = Token::new_borrowed(TokenKind::CurlyClose, "}");
+                    let _comma = Token::new_borrowed(TokenKind::Comma, ", ");
+                    let _colon = Token::new_borrowed(TokenKind::Colon, ": ");
 
                     #parse_name
                     tracker.try_token(&_curly_open)?;
@@ -1010,10 +1010,10 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
 
             (
                 quote! {
-                    let _open = Token::new_borrowed(TokenInner::TupleOpen, "(");
-                    let _close = Token::new_borrowed(TokenInner::TupleClose, ")");
-                    let _comma = Token::new_borrowed(TokenInner::Comma, ", ");
-                    let _colon = Token::new_borrowed(TokenInner::Colon, ": ");
+                    let _open = Token::new_borrowed(TokenKind::TupleOpen, "(");
+                    let _close = Token::new_borrowed(TokenKind::TupleClose, ")");
+                    let _comma = Token::new_borrowed(TokenKind::Comma, ", ");
+                    let _colon = Token::new_borrowed(TokenKind::Colon, ": ");
 
                     #parse_name
 
@@ -1079,11 +1079,11 @@ fn impls_for_deser(kr: &Tokens, input: &DeriveInput, info: &DeriveInfo) -> (bool
                     if !tracker.has_remaining() {
                         for name in &[#(#names,)*] {
                             tracker.possible_token(
-                                Token::new_borrowed(TokenInner::Ident, *name));
+                                Token::new_borrowed(TokenKind::Ident, *name));
                         }
                         return Err(deser::DeserError::EndOfTokenList);
                     }
-                    if let TokenInner::Ident = tracker.top().inner {
+                    if let TokenKind::Ident = tracker.top_kind() {
                         let text = tracker.top().text.as_ref();
                         match text {
                             #(#match_arms),*
@@ -1093,7 +1093,7 @@ fn impls_for_deser(kr: &Tokens, input: &DeriveInput, info: &DeriveInfo) -> (bool
                                     if name.starts_with(&text) {
                                         tracker.possible_token(
                                             Token::new_borrowed(
-                                                TokenInner::Ident, *name));
+                                                TokenKind::Ident, *name));
                                     }
                                 }
                                 return Err(deser::DeserError::UnexpectedToken);

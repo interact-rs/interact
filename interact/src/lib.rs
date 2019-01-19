@@ -56,7 +56,7 @@ macro_rules! try_seen_dyn {
 
 // tokens
 mod tokens;
-pub use crate::tokens::{Token, TokenInner, TokenVec};
+pub use crate::tokens::{Token, TokenKind, TokenVec};
 
 // deser
 pub mod deser;

@@ -8,7 +8,7 @@ use crate::access::derive::{ReflectEnum, ReflectStruct, StructKind};
 use crate::deser;
 use crate::reflector::Reflector;
 use crate::{
-    Access, CallError, ExpectTree, Function, NodeInfo, NodeTree, ReflectMut, Token, TokenInner,
+    Access, CallError, ExpectTree, Function, NodeInfo, NodeTree, ReflectMut, Token, TokenKind,
     TokenVec,
 };
 use crate::{Assist, NextOptions};
@@ -86,24 +86,24 @@ macro_rules! climber_impl {
         };
 
         if !$self.tokenvec.is_empty() {
-            if let TokenInner::FieldAccess = &$self.tokenvec.top().inner {
+            if let TokenKind::FieldAccess = &$self.tokenvec.top_kind() {
                 $self.tokenvec.advance(1);
             } else {
-                $self.expect_token(TokenInner::FieldAccess, Cow::Borrowed("."));
+                $self.expect_token(TokenKind::FieldAccess, Cow::Borrowed("."));
                 return Ok(None);
             }
 
             if $self.tokenvec.remaining() >= 1 {
-                if let TokenInner::Ident = &$self.tokenvec.top().inner {
+                if let TokenKind::Ident = &$self.tokenvec.top_kind() {
                     prefix = String::from($self.tokenvec.top().text.as_ref());
-                } else if let TokenInner::NonNegativeDecimal(nnd) = &$self.tokenvec.top().inner {
+                } else if let TokenKind::NonNegativeDecimal(nnd) = &$self.tokenvec.top_kind() {
                     prefix = format!("{}", nnd);
                 } else {
                     return Err(ClimbError::UnexpectedToken);
                 }
             }
         } else {
-            $self.expect_token(TokenInner::FieldAccess, Cow::Borrowed("."));
+            $self.expect_token(TokenKind::FieldAccess, Cow::Borrowed("."));
         };
 
         match p_match {
@@ -123,7 +123,7 @@ macro_rules! climber_impl {
                                 ).map(Some)
                             }
                             if name.starts_with(prefix.as_str()) {
-                                $self.expect_token(TokenInner::Ident, Cow::Owned(name));
+                                $self.expect_token(TokenKind::Ident, Cow::Owned(name));
                                 $self.expect.retract_one();
                             }
                         }
@@ -139,7 +139,7 @@ macro_rules! climber_impl {
                                 ).map(Some)
                             }
                             if name.starts_with(prefix.as_str()) {
-                                $self.expect_token(TokenInner::Ident, Cow::Borrowed(name));
+                                $self.expect_token(TokenKind::Ident, Cow::Borrowed(name));
                                 $self.expect.retract_one();
                             }
                         }
@@ -165,7 +165,7 @@ macro_rules! climber_impl {
                     }
                 } else {
                     if desc.name.starts_with(prefix.as_str()) {
-                        $self.expect_token(TokenInner::Ident, Cow::Borrowed(desc.name));
+                        $self.expect_token(TokenKind::Ident, Cow::Borrowed(desc.name));
                         $self.expect.retract_one();
                     }
                 }
@@ -184,10 +184,10 @@ macro_rules! climber_impl {
         let mut prefix : String = "".to_owned();
 
         if !$self.tokenvec.is_empty() {
-            if let TokenInner::FieldAccess = &$self.tokenvec.top().inner {
+            if let TokenKind::FieldAccess = &$self.tokenvec.top_kind() {
                 $self.tokenvec.step();
                 if !$self.tokenvec.is_empty() {
-                    if let TokenInner::Ident = &$self.tokenvec.top().inner {
+                    if let TokenKind::Ident = &$self.tokenvec.top_kind() {
                         prefix = String::from($self.tokenvec.top().text.as_ref());
                     } else {
                         return Err(ClimbError::UnexpectedToken);
@@ -197,18 +197,18 @@ macro_rules! climber_impl {
                 return Ok(None);
             }
         } else {
-            $self.expect_token(TokenInner::FieldAccess, Cow::Borrowed("."));
+            $self.expect_token(TokenKind::FieldAccess, Cow::Borrowed("."));
         };
 
         for function in $functions {
             if function.name == prefix {
                 $self.tokenvec.advance(1);
                 if $self.tokenvec.is_empty() {
-                    $self.expect_token(TokenInner::TupleOpen, Cow::Borrowed("("));
+                    $self.expect_token(TokenKind::TupleOpen, Cow::Borrowed("("));
                     return Ok(None);
                 }
 
-                if let TokenInner::TupleOpen = &$self.tokenvec.top().inner {
+                if let TokenKind::TupleOpen = &$self.tokenvec.top_kind() {
                     let retval : Rc<RefCell<Option<Result<Option<NodeTree>, ClimbError>>>> =
                         Rc::new(RefCell::new(None));
                     let retval2 = retval.clone();
@@ -245,8 +245,8 @@ macro_rules! climber_impl {
             }
 
             if function.name.starts_with(prefix.as_str()) {
-                $self.expect_token(TokenInner::Ident, Cow::Borrowed(function.name));
-                $self.expect_token(TokenInner::TupleOpen, Cow::Borrowed("("));
+                $self.expect_token(TokenKind::Ident, Cow::Borrowed(function.name));
+                $self.expect_token(TokenKind::TupleOpen, Cow::Borrowed("("));
                 $self.expect.retract_one();
                 $self.expect.retract_one();
             }
@@ -328,10 +328,10 @@ impl<'a> Climber<'a> {
         self.valid_pos = self.tokenvec.pos();
 
         if !self.tokenvec.is_empty() {
-            if let TokenInner::Assign = &self.tokenvec.top().inner {
+            if let TokenKind::Assign = &self.tokenvec.top_kind() {
                 return Err(ClimbError::NeedMutPath);
             }
-            if let TokenInner::Asterix = &self.tokenvec.top().inner {
+            if let TokenKind::Asterix = &self.tokenvec.top_kind() {
                 self.tokenvec.advance(1);
             }
         }
@@ -378,7 +378,7 @@ impl<'a> Climber<'a> {
         self.valid_pos = self.tokenvec.pos();
 
         if !self.tokenvec.is_empty() {
-            if let TokenInner::Assign = &self.tokenvec.top().inner {
+            if let TokenKind::Assign = &self.tokenvec.top_kind() {
                 self.tokenvec.advance(1);
 
                 let probe_only = self.probe_only;
@@ -392,7 +392,7 @@ impl<'a> Climber<'a> {
                     Err(e) => Err(ClimbError::AssignError(e)),
                 };
             }
-            if let TokenInner::Asterix = &self.tokenvec.top().inner {
+            if let TokenKind::Asterix = &self.tokenvec.top_kind() {
                 self.tokenvec.advance(1);
             }
         }
@@ -485,9 +485,9 @@ impl<'a> Climber<'a> {
                       EnumOrStructMut, self, reflect)
     }
 
-    fn expect_token(&mut self, inner: TokenInner, text: Cow<'static, str>) {
+    fn expect_token(&mut self, kind: TokenKind, text: Cow<'static, str>) {
         self.expect.advance(Token {
-            inner,
+            kind,
             space_diff: 0,
             text,
         });
@@ -540,11 +540,11 @@ impl<'a> Climber<'a> {
 
     pub fn open_bracket(&mut self) -> bool {
         if self.tokenvec.is_empty() {
-            self.expect_token(TokenInner::SubscriptOpen, Cow::Borrowed("["));
+            self.expect_token(TokenKind::SubscriptOpen, Cow::Borrowed("["));
             return false;
         }
 
-        if let TokenInner::SubscriptOpen = &self.tokenvec.top().inner {
+        if let TokenKind::SubscriptOpen = &self.tokenvec.top_kind() {
             self.tokenvec.advance(1);
             true
         } else {
@@ -554,11 +554,11 @@ impl<'a> Climber<'a> {
 
     pub fn close_bracket(&mut self) -> Result<(), ClimbError> {
         if self.tokenvec.is_empty() {
-            self.expect_token(TokenInner::TupleClose, Cow::Borrowed("]"));
+            self.expect_token(TokenKind::TupleClose, Cow::Borrowed("]"));
             return Err(ClimbError::UnexpectedExpressionEnd);
         }
 
-        if let TokenInner::SubscriptClose = &self.tokenvec.top().inner {
+        if let TokenKind::SubscriptClose = &self.tokenvec.top_kind() {
             self.tokenvec.advance(1);
             Ok(())
         } else {

@@ -1,5 +1,5 @@
 use crate::deser::{Deser, Result, Tracker};
-use crate::tokens::{Token, TokenInner};
+use crate::tokens::{Token, TokenKind};
 
 macro_rules! tuple {
     ({ $(($n:ident, $i:tt)),* }) => {
@@ -7,9 +7,9 @@ macro_rules! tuple {
             where $($n : Deser),*
         {
             fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
-                let open = Token::new_borrowed(TokenInner::TupleOpen, "(");
-                let close = Token::new_borrowed(TokenInner::TupleClose, ")");
-                let comma = Token::new_borrowed(TokenInner::Comma, ", ");
+                let open = Token::new_borrowed(TokenKind::TupleOpen, "(");
+                let close = Token::new_borrowed(TokenKind::TupleClose, ")");
+                let comma = Token::new_borrowed(TokenKind::Comma, ", ");
 
                 tracker.try_token(&open)?;
                 Ok(($(
@@ -43,8 +43,8 @@ where
     A: Deser,
 {
     fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
-        let open = Token::new_borrowed(TokenInner::TupleOpen, "(");
-        let close = Token::new_borrowed(TokenInner::TupleClose, ")");
+        let open = Token::new_borrowed(TokenKind::TupleOpen, "(");
+        let close = Token::new_borrowed(TokenKind::TupleClose, ")");
         tracker.try_token(&open)?;
         let a = Deser::deser(tracker)?;
         // TODO: allow for an extra ',' token
@@ -55,8 +55,8 @@ where
 
 impl Deser for () {
     fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> Result<Self> {
-        let open = Token::new_borrowed(TokenInner::TupleOpen, "(");
-        let close = Token::new_borrowed(TokenInner::TupleClose, ")");
+        let open = Token::new_borrowed(TokenKind::TupleOpen, "(");
+        let close = Token::new_borrowed(TokenKind::TupleClose, ")");
         tracker.try_token(&open)?;
         tracker.try_token(&close)?;
         Ok(())

@@ -38,6 +38,7 @@ pub enum TokenInner {
     InvalidToken,
 }
 
+/// Represents a single meaningful substring part in an Interact string expression.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Token<'a> {
     /// Token kind

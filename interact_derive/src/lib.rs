@@ -21,6 +21,25 @@ struct DeriveInfo {
     basic: bool,
 }
 
+/// # Attributes that Interact derive macro supports
+///
+/// ## Type context:
+///
+/// ```ignore
+/// #[interact(mut_fn(function_name(param_a, param_b)))
+/// #[interact(immut_fn(function_name(param_a, param_b)))
+/// ```
+///
+/// ### Per field:
+///
+/// The ignore attribute allows to make some fields invisible:
+/// ```ignore
+/// #[interact(ignore))
+/// ```
+///
+/// The downside is that having any ignored field on a type means that it is unbuildable, and
+/// therefore cannot be passed as parameter value to functions or to be assigned using `=` in
+/// an expression.
 #[proc_macro_derive(Interact, attributes(interact))]
 pub fn derive_interact(input: TokenStream) -> TokenStream {
     derive_interact_inner(

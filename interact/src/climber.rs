@@ -7,11 +7,11 @@ use std::sync::{Arc, Mutex};
 use crate::access::derive::{ReflectEnum, ReflectStruct, StructKind};
 use crate::deser;
 use crate::reflector::Reflector;
-use crate::{NextOptions, Assist};
 use crate::{
     Access, CallError, ExpectTree, Function, NodeInfo, NodeTree, ReflectMut, Token, TokenInner,
     TokenVec,
 };
+use crate::{Assist, NextOptions};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum ClimbError {
@@ -31,6 +31,9 @@ pub enum ClimbError {
     UnexpectedToken,
 }
 
+/// Climber represents the full state of evaluation of Interact expressions.  It is used within the
+/// impls of the `Access` trait, and most likely does not require direct references from `Interact`
+/// users, unless manually providing impls of `Accees` not via the `#[derive(Interact)]`.
 #[derive(Clone)]
 pub struct Climber<'a> {
     probe_only: bool,

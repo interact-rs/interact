@@ -1,3 +1,4 @@
+/// This module defines the main traits used to dynamically operate and reflect on Rust types using Interact.
 use std::sync::Arc;
 
 use crate::deser::Deser;
@@ -37,7 +38,7 @@ pub trait ReflectDirect {
     ) -> Result<Option<NodeTree>, ClimbError>;
 }
 
-/// An arbitrar between the two possible way to climb into a value.
+/// An arbitrar between the two possible way to climb into an immutable value.
 pub enum Reflect<'a> {
     Indirect(&'a dyn ReflectIndirect),
     Direct(&'a dyn ReflectDirect),
@@ -48,7 +49,7 @@ pub struct Function {
     pub args: &'static [&'static str],
 }
 
-/// MutAccess adds function call information over ReflectMut.
+/// MutAccess adds function call information over `ReflectMut`.
 pub struct MutAccess<'a> {
     pub reflect: ReflectMut<'a>,
     pub functions: &'static [Function],
@@ -63,7 +64,7 @@ impl<'a> MutAccess<'a> {
     }
 }
 
-/// ImmutAccess adds function call information over Reflect.
+/// ImmutAccess adds function call information over `Reflect`.
 pub struct ImmutAccess<'a> {
     pub reflect: Reflect<'a>,
     pub functions: &'static [Function],
@@ -78,9 +79,13 @@ impl<'a> ImmutAccess<'a> {
     }
 }
 
+/// An arbitrar between the two possible way to climb into a mutable value.
 pub enum ReflectMut<'a> {
     Indirect(&'a mut dyn ReflectIndirect),
     Direct(&'a mut dyn ReflectDirect),
+
+    /// Internally signals that the value is not really mutable, for example
+    /// we cannot change a reference value field from Interact context.
     Immutable,
 }
 
@@ -88,15 +93,23 @@ pub enum ReflectMut<'a> {
 pub enum AssignError {
     Deser(deser::DeserError),
 
-    // Some types, having ignored fields, will be unbuildable.
+    /// Some types, having ignored fields, will be unbuildable.
     Unbuildable,
+
+    /// Other values are immutable, such as reference values.
     Immutable,
 }
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum CallError {
     Deser(deser::DeserError),
+
+    /// Signals the Climber stack to retract into a mutable path so that the
+    /// field we are attempting to operate on will be recalled in a mutable
+    /// state.
     NeedMutable,
+
+    /// The called function does not exist.
     NoSuchFunction,
 }
 

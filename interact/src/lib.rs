@@ -8,6 +8,11 @@
 //! Being hard as it is to introduce interpreters into compiled languages, the Interact project
 //! aimes to provide a midway solution using stable Rust.
 //!
+//! # Usage
+//!
+//! NOTE: **Unless you are manually extending types for use under Interact, you probably don't need
+//! most of the items that are exported in this crate**. Instead, look for the `interact_prompt` crate.
+//!
 //! # Design
 //!
 //! Interact introduces a series of traits, the main ones are `Access` and `Deser` trait. Those
@@ -25,13 +30,6 @@
 //!    reference cycles, imposed output limitations, mutexs, and customized in-process indirections.
 //! * `climber`, which when given a Rust-like expression of an inner value, knows how to go from an
 //!    Interact root down to a field.
-//!
-//!
-//! # Usage
-//!
-//! Unless you are manually extending types for use under Interact, you probably don't need this
-//! to use the items in this crate directly. Instead, look for the `interact_prompt` crate.
-//!
 
 #[macro_use]
 extern crate pest_derive;
@@ -62,6 +60,7 @@ pub use crate::tokens::{Token, TokenInner, TokenVec};
 
 // deser
 pub mod deser;
+#[doc(inline)]
 pub use crate::deser::Deser;
 
 // reflector
@@ -71,16 +70,23 @@ pub use crate::reflector::Reflector;
 
 // access
 pub mod access;
+#[doc(hidden)]
 pub use crate::access::{
     derive::{Enum, ReflectEnum, ReflectStruct, Struct, StructKind},
-    deser_assign,
     iter::ReflectIter,
-    Access, AssignError, CallError, Function, ImmutAccess, MutAccess, Reflect, ReflectDirect,
+    Function,
+};
+
+#[doc(inline)]
+pub use crate::access::{
+    deser_assign, Access, AssignError, CallError, ImmutAccess, MutAccess, Reflect, ReflectDirect,
     ReflectIndirect, ReflectMut, RetValCallback,
 };
 
 // #derive
+#[doc(hidden)]
 pub use interact_derive::derive_interact_extern_opqaue;
+
 pub use interact_derive::Interact;
 
 // util
@@ -90,6 +96,7 @@ pub use crate::node_tree::{NodeInfo, NodeTree};
 
 // climber
 pub mod climber;
+#[doc(inline)]
 pub use crate::climber::{ClimbError, Climber};
 
 #[doc(hidden)]
@@ -97,6 +104,7 @@ pub use crate::climber::{EnumOrStruct, EnumOrStructMut};
 
 // root
 pub mod root;
+#[doc(inline)]
 pub use crate::root::{Root, RootLocal, RootSend};
 
 //

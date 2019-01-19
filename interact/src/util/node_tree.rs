@@ -27,6 +27,8 @@ pub type PtrMeta = Arc<AtomicUsize>;
 #[derive(Debug)]
 pub struct Wrap(pub PtrMeta);
 
+/// NodeTree represent a reflection of an Interact type that implemented the `Access` trait. It may
+/// be a partial reflection due to limits and indirections (see `Reflector`).
 #[derive(Debug)]
 pub struct NodeTree {
     pub info: NodeInfo,

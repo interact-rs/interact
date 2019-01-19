@@ -4,6 +4,8 @@ use crate::{
     tokens::parse_to_tokens, Access, Assist, ClimbError, Climber, NextOptions, NodeTree, Token,
 };
 
+/// Holds a root dictionary of `Send`-able trait objects that implement `Access` and are therefor
+/// Interact-able. These are most likely objects that are held globally behind an `Arc`.
 #[derive(Default)]
 pub struct RootSend {
     pub owned: BTreeMap<&'static str, Box<dyn Access + Send>>,
@@ -22,6 +24,8 @@ impl RootSend {
     }
 }
 
+/// Holds a root dictionary of trait objects that implement `Access` and are therefore Interact-able.
+/// These are most likely objects that are held locally behind an `Rc`.
 #[derive(Default)]
 pub struct RootLocal {
     pub owned: BTreeMap<&'static str, Box<dyn Access>>,
@@ -33,16 +37,31 @@ impl RootLocal {
     }
 }
 
+/// A temporary binder of `RootSend` and `RootLocal` dictionaries, used for providing a unified
+/// dictionary to the user.
 pub struct Root<'a, 'b> {
     pub send: Option<&'a mut RootSend>,
     pub local: Option<&'b mut RootLocal>,
 }
 
 impl<'a, 'b> Root<'a, 'b> {
+    /// Probe a path, checking if it is valid. If it contains a function name, it will not be
+    /// called. If it contains an assignment, the assignment will not take place but the parameters
+    /// value will check for `Deser` deserialization.
+    ///
+    /// This call may block the current thread until `ReflectIndirect` evaluation is resolved, and
+    /// it may block because some fields, depending on the types and usage, could be behind a
+    /// `Mutex` lock.
     pub fn probe(&mut self, path_str: &str) -> (Result<NodeTree, ClimbError>, Assist<String>) {
         self._access(path_str, true)
     }
 
+    /// Perform evaluation of the provided path. This may perform assignments, or call user-defined
+    /// functions via the `#[interact(...)]` type attribute.
+    ///
+    /// This call may block the current thread until `ReflectIndirect` evaluation is resolved, and
+    /// it may block because some fields, depending on the types and usage, could be behind a
+    /// `Mutex` lock.
     pub fn access(&mut self, path_str: &str) -> (Result<NodeTree, ClimbError>, Assist<String>) {
         self._access(path_str, false)
     }

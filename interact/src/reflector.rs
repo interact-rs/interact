@@ -15,6 +15,10 @@ use crate::node_tree::{NodeInfo, NodeTree, PtrMeta, Wrap};
 
 type ObjPtr = (usize, usize);
 
+/// `Reflector` operates on types implementing `Access`. Some of its methods are behind called
+/// automatically from `#[derive(Interact)] impls. It provides a thread-safe context, because on
+/// the extreme case, where it is possible that reflection is done via indirection using multiple
+/// process threads (see `ReflectIndirect`).
 pub struct Reflector {
     limit: usize,
     used: AtomicUsize,

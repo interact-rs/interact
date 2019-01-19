@@ -77,7 +77,9 @@ fn main() -> Result<(), interact_prompt::PromptError> {
 
 It can be run using `cargo run --example mini-example`. Here's a recorded session:
 
-<img src="doc/demo.apng">
+<p align="center">
+  <img src="doc/demo.apng">
+</p>
 
 ## Getting help
 

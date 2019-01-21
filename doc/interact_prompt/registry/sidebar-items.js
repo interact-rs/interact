@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["LocalRegistry","The Local Registry manages state roots of per-thread states."],["SendRegistry","The `Send` Registry manages state roots of the whole process."]]});

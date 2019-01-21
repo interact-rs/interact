@@ -1,0 +1,5 @@
+[book]
+authors = ["Dan Aloni"]
+multilingual = false
+src = "src"
+title = "Interact"

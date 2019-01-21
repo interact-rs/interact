@@ -38,7 +38,7 @@ struct DeriveInfo {
 /// ```
 ///
 /// The downside is that having any ignored field on a type means that it is unbuildable, and
-/// therefore cannot be passed as parameter value to functions or to be assigned using `=` in
+/// therefore cannot be passed as value to functions or to be assigned using `=` in
 /// an expression.
 #[proc_macro_derive(Interact, attributes(interact))]
 pub fn derive_interact(input: TokenStream) -> TokenStream {

@@ -7,6 +7,11 @@
 
 **Interact is a framework for friendly online introspection of the running program state in an intuitive command-line *interact*ive way.**
 
+You may be looking for:
+
+* Documentation: [stable](https://docs.rs/interact/0.2.0/interact/), [master branch](https://interact-rs.github.io/interact/doc/interact/index.html).
+* [Book](http://interact-rs.github.io/interact/book/) (master branch version).
+
 ---
 
 Interact is useful for server programs that otherwise receive no input. You can use Interact to make your server receive commands using the special prompt from the `interact_prompt` crate. The commands can be used to browse your server's internal state, modify it, and call function methods that were specified in `interact` derive attributes.

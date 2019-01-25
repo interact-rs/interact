@@ -9,7 +9,7 @@
 
 You may be looking for:
 
-* Documentation: [stable](https://docs.rs/interact/0.2.0/interact/), [master branch](https://interact-rs.github.io/interact/doc/interact/index.html).
+* Documentation: [stable](https://docs.rs/interact/0.3.0/interact/), [master branch](https://interact-rs.github.io/interact/doc/interact/index.html).
 * [Book](http://interact-rs.github.io/interact/book/) (master branch version).
 
 ---

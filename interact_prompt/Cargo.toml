@@ -1,6 +1,6 @@
 [package]
 name = "interact_prompt"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Dan Aloni <alonid@gmail.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
@@ -15,7 +15,7 @@ include = ["Cargo.toml", "src/**/*.rs", "crates-io.md", "README.md", "LICENSE-AP
 
 [dependencies]
 rustyline = "2.1.0"
-interact = "0.2"
+interact = "0.3.0"
 lazy_static = "1.2"
 ansi_term = "0.11"
 

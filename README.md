@@ -1,16 +1,20 @@
-# Interact &emsp; [![Build Status]][travis] [![Latest Version]][crates.io]
+# Interact &emsp; [![Build Status]][travis] [![Latest Version]][crates.io] [![Docs badge]][Docs link] [![License badge]][License link]
 
 [Build Status]: https://api.travis-ci.org/interact-rs/interact.svg?branch=master
 [travis]: https://travis-ci.org/interact-rs/interact
 [Latest Version]: https://img.shields.io/crates/v/interact.svg
 [crates.io]: https://crates.io/crates/interact
+[License badge]: https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg
+[License link]: https://travis-ci.org/interact-rs/interact
+[Docs badge]: https://docs.rs/interact/badge.svg
+[Docs link]: https://docs.rs/interact
 
 **Interact is a framework for friendly online introspection of the running program state in an intuitive command-line *interact*ive way.**
 
 You may be looking for:
 
-* Documentation: [stable](https://docs.rs/interact/0.3.0/interact/), [master branch](https://interact-rs.github.io/interact/doc/interact/index.html).
-* [Book](http://interact-rs.github.io/interact/book/) (master branch version).
+* [Book](https://interact-rs.github.io/interact/book/) (master).
+* [Docs](https://interact-rs.github.io/interact/doc/interact/index.html) (master).
 
 ---
 

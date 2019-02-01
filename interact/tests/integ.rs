@@ -102,6 +102,8 @@ impl Context {
         verify!(self, root.access("complex.check()") => "(Ok(NodeTree { info: Leaf(\"true\"), meta: Some(Wrap(1)), size: 5 }), Assist { valid: 15, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
         verify!(self, root.access("complex.tuple_1.0 = 4") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 21, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
         verify!(self, root.access("complex.check()") => "(Ok(NodeTree { info: Leaf(\"false\"), meta: Some(Wrap(1)), size: 6 }), Assist { valid: 15, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("complex.add(3)") => "(Ok(NodeTree { info: Leaf(\"()\"), meta: Some(Wrap(1)), size: 3 }), Assist { valid: 14, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("complex.tuple_1.0 = 7") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 21, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
 
         // TODO: add more comparision tests
     }

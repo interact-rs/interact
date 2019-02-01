@@ -322,18 +322,35 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
         let name_ident = syn::Ident::from(name.as_str());
         let mut match_vec = vec![];
         let mut arg_vec = vec![];
+        let mut arg_vec_unpack = vec![];
         let mut arg_str_vec = vec![];
 
         for arg in &func.args {
             arg_str_vec.push(arg.as_str());
-            match_vec.push(syn::token::Underscore::new(proc_macro2::Span::call_site()));
+            match_vec.push({
+                let v = syn::token::Underscore::new(proc_macro2::Span::call_site());
+                if func.args.len() == 1 {
+                    quote! { #v, }
+                } else {
+                    quote! { #v }
+                }
+            });
             arg_vec.push(syn::Ident::from(arg.as_str()));
+            arg_vec_unpack.push({
+                let v = syn::Ident::from(arg.as_str());
+                if func.args.len() == 1 {
+                    quote! { #v, }
+                } else {
+                    quote! { #v }
+                }
+            });
         }
         let arg_vec_ref = &arg_vec;
+        let arg_vec_unpack_ref = &arg_vec_unpack;
         let match_vec = &match_vec;
 
         let mut call_impl = quote! {
-            <(#(#match_vec),*)>::deser(&mut _climber.borrow_tracker()).map(|(#(#arg_vec_ref),*)| {
+            <(#(#match_vec),*)>::deser(&mut _climber.borrow_tracker()).map(|(#(#arg_vec_unpack_ref),*)| {
                 if !_climber.is_probe_only() {
                     let _retval = self.#name_ident(#(#arg_vec_ref),*);
                     (_retcall)(&_retval, _climber);
@@ -343,7 +360,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
         if mutability == Mutability::ReadAccess {
             if func.mutability == Mutability::ModifyAccess {
                 call_impl = quote! {
-                    <(#(#match_vec),*)>::deser(&mut _climber.borrow_tracker()).map(|(#(#arg_vec_ref),*)| {
+                    <(#(#match_vec),*)>::deser(&mut _climber.borrow_tracker()).map(|(#(#arg_vec_unpack_ref),*)| {
                         if !_climber.is_probe_only() {
                             // Non executing unsafe code only for coercing type checking
                             if false {

@@ -44,6 +44,8 @@
 <span id="44">44</span>
 <span id="45">45</span>
 <span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">deser</span>::<span class="ident">Deser</span>;
 
@@ -51,10 +53,12 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deser</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">T</span>] <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Deser</span> {}
 
+<span class="comment">// TODO: implement</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deser</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Deser</span> {}
 
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">sized_iter</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>) <span class="op">=&gt;</span> {
+        <span class="comment">// TODO: implement</span>
         <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deser</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Deser</span> {}
     };
 }

@@ -293,7 +293,7 @@
 
 <span class="kw">type</span> <span class="ident">ObjPtr</span> <span class="op">=</span> (<span class="ident">usize</span>, <span class="ident">usize</span>);
 
-<span class="doccomment">/// `Reflector` operates on types implementing `Access`. Some of its methods are behind called</span>
+<span class="doccomment">/// `Reflector` operates on types implementing `Access`. Some of its methods are being called</span>
 <span class="doccomment">/// automatically from `#[derive(Interact)]` impls. It provides a thread-safe context, because on</span>
 <span class="doccomment">/// the extreme case, where it is possible that reflection is done via indirection using multiple</span>
 <span class="doccomment">/// process threads (see `ReflectIndirect`).</span>

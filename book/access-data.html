@@ -141,7 +141,52 @@
                 <div id="content" class="content">
                     <main>
                         <a class="header" href="#accessing-data" id="accessing-data"><h1>Accessing data</h1></a>
-<p><em>TODO</em></p>
+<a class="header" href="#whole-state" id="whole-state"><h2>Whole state</h2></a>
+<p>Suppose a value of the following simple state is registered:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[derive(Interact)]
+struct Point {
+    x: u32,
+    y: u32,
+}
+#}</code></pre></pre>
+<p>The whole of it can be printed, and the result is similar to a pretty printed <code>Debug</code>:</p>
+<pre><code class="language-shell">&gt;&gt;&gt; state
+Point { x: 3, y: 4 }
+</code></pre>
+<p>Tuple structs are accessed similarly using Rust's <code>.0</code>, <code>.1</code>, etc.</p>
+<a class="header" href="#field-access" id="field-access"><h2>Field access</h2></a>
+<p>The syntax for field access is similar to Rust's. For example, accessing one of the fields of the previous example:</p>
+<pre><code class="language-shell">&gt;&gt;&gt; state.x
+3
+</code></pre>
+<a class="header" href="#enum-access" id="enum-access"><h2>Enum access</h2></a>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+struct OptPoint {
+    x: Option&lt;u32&gt;,
+    y: Option&lt;u32&gt;,
+}
+#}</code></pre></pre>
+<p>Suppose that we have an instance of this struct with the following value:</p>
+<p><code>OptPoint { x: None, y: Some(3) }</code></p>
+<p>Unlike in Rust, we can have a full path to the variant's value through variant's name:</p>
+<pre><code class="language-shell">&gt;&gt;&gt; state.y.Some
+(3)
+&gt;&gt;&gt; state.y.Some.0
+3
+&gt;&gt;&gt; state.x
+None
+&gt;&gt;&gt; basic.x.None
+None
+</code></pre>
+<a class="header" href="#vec-hashmap-and-btreemap-access" id="vec-hashmap-and-btreemap-access"><h2>Vec, HashMap, and BTreeMap access</h2></a>
+<p>Accessing vectors and maps are done like you'd expected via <code>[]</code>. Currently, ranges are <em>not</em> supported in vectors and sorted maps.</p>
+<a class="header" href="#access-via-mutex-rc-arc-refcell-box" id="access-via-mutex-rc-arc-refcell-box"><h2>Access via <code>Mutex</code>, <code>Rc</code>, <code>Arc</code>, <code>RefCell</code>, <code>Box</code></h2></a>
+<p>Interact elides complexity to access paths when wrapper types are used. For Mutex, it uses <code>.try_lock()</code> behind the scenes. For <code>RefCell</code> it uses <code>try_borrow()</code>.</p>
 
                     </main>
 

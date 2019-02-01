@@ -115,7 +115,7 @@ pub enum CallError {
 
 pub type RetValCallback<'a> = Box<FnMut(&dyn Access, &mut Climber<'a>)>;
 
-/// The `Access` trait, meant to be used as a trait objects provides methods that
+/// The `Access` trait, meant to be used as a trait object, provides methods that
 /// dynamically expose read&write access to the underlying objects.
 pub trait Access {
     /// Expose an immmutable accessor, used when `Access` is immutable or mutable.

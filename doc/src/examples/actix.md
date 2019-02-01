@@ -1,8 +1,8 @@
 # Actix
 
-To get a taste of Interact as applied to actual servers, you can try the Interact-enable Actix chat demo (originally from [here](https://github.com/actix/actix/tree/master/examples/chat)).
+To get a taste of Interact as applied to actual servers, you can try the Interact-enabled Actix chat demo (originally from [here](https://github.com/actix/actix/tree/master/examples/chat)).
 
-While the state of an Actix program is spread across a stack of Futures that may exist in multiple process thread, Interact has no difficulty in traversing it and presenting a whole picture.
+While the state of an Actix program is spread across a stack of `Future`s that may exist in multiple process thread, Interact has no difficulty in traversing it and presenting a whole picture of the server.
 
 ### Summary of changes
 

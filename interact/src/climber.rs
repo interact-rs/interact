@@ -32,8 +32,8 @@ pub enum ClimbError {
 }
 
 /// Climber represents the full state of evaluation of Interact expressions.  It is used within the
-/// impls of the `Access` trait, and most likely does not require direct references from `Interact`
-/// users, unless manually providing impls of `Accees` not via the `#[derive(Interact)]`.
+/// impls of the `Access` trait, and most likely does not require direct references from Interact's
+/// crate users, unless manually providing impls of `Access` not via the `#[derive(Interact)]`.
 #[derive(Clone)]
 pub struct Climber<'a> {
     probe_only: bool,

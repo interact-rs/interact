@@ -1,6 +1,6 @@
 # Alacritty
 
-By enabling Interact for a program such as Alacritty, we can probe and modify its state while it runs (for example, the cursor's position).
+By enabling Interact for a program such as Alacritty, we can probe and modify its state while it runs (for example, modify the cursor's position from the Interact prompt).
 
 ### Summary of changes
 

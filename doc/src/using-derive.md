@@ -6,7 +6,7 @@ The Interact dependency is needed:
 
 ```toml
 [dependencies]
-interact = "0.2"
+interact = "0.3"
 ```
 
 ## Source

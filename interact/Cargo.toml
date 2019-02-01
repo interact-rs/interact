@@ -11,7 +11,7 @@ repository = "https://github.com/interact-rs/interact"
 keywords = ["prompt", "reflection", "introspection", "interact", "cli"]
 categories = ["command-line-interface"]
 readme = "crates-io.md"
-include = ["Cargo.toml", "src/**/*.rs", "src/**/*.pest", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
+include = ["Cargo.toml", "src/**/*.rs", "src/**/*.pest", "tests/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [dependencies]
 interact_derive = "0.3.0"

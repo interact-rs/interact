@@ -20,4 +20,5 @@ pest = "2.0.1"
 pest_derive = "2.0.1"
 
 [dev-dependencies]
+rand = "=0.5"
 pretty_assertions = "0.5.1"

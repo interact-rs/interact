@@ -1,125 +1,12 @@
-#![allow(dead_code, unused_imports, unused_mut, unused)] // REMOVE ME
 extern crate interact;
 
-use std::collections::BTreeMap;
-use std::fmt::Debug;
-use std::sync::Arc;
-use std::sync::Mutex;
-
-#[macro_use]
-extern crate interact_derive;
 use pretty_assertions::assert_eq;
+mod common;
+use common::{Basic, Complex, LocalRcLoop, Rand};
 
-/// Cover private Mutex derive
-mod mutex {
-    use interact::access::{Access, ReflectDirect};
-    use interact::climber::{ClimbError, Climber};
-    use interact::deser::{self, Tracker};
-    use interact::{Deser, NodeTree, Reflector};
-
-    use std::ops::Deref;
-    use std::ops::DerefMut;
-    use std::sync::Arc;
-
-    pub struct PseudoMutex<T> {
-        t: T,
-    }
-
-    impl<T> PseudoMutex<T> {
-        fn new(t: T) -> Self {
-            PseudoMutex { t }
-        }
-    }
-
-    struct Guard(());
-
-    impl<T> PseudoMutex<T> {
-        fn lock(&self) -> Guard {
-            Guard(())
-        }
-    }
-
-    impl Deref for Guard {
-        type Target = ();
-
-        fn deref(&self) -> &() {
-            &self.0
-        }
-    }
-
-    impl DerefMut for Guard {
-        fn deref_mut(&mut self) -> &mut () {
-            &mut self.0
-        }
-    }
-
-    impl<T> ReflectDirect for PseudoMutex<T>
-    where
-        T: Access,
-    {
-        fn immut_reflector(&self, reflector: &Arc<Reflector>) -> NodeTree {
-            let locked = self.lock();
-            Reflector::reflect(reflector, &*locked)
-        }
-
-        fn immut_climber<'a>(
-            &self,
-            climber: &mut Climber<'a>,
-        ) -> Result<Option<NodeTree>, ClimbError> {
-            let save = climber.clone();
-            let retval = {
-                let locked = self.lock();
-                climber.general_access_immut(&*locked).map(Some)
-            };
-
-            if let Err(ClimbError::NeedMutPath) = &retval {
-                *climber = save;
-                let mut locked = self.lock();
-                climber.general_access_mut(&mut *locked).map(Some)
-            } else {
-                retval
-            }
-        }
-
-        fn mut_climber<'a>(
-            &mut self,
-            climber: &mut Climber<'a>,
-        ) -> Result<Option<NodeTree>, ClimbError> {
-            let mut locked = self.lock();
-            climber.general_access_mut(&mut *locked).map(Some)
-        }
-    }
-
-    impl<T> Deser for PseudoMutex<T>
-    where
-        T: Deser,
-    {
-        fn deser<'a, 'b>(tracker: &mut Tracker<'a, 'b>) -> deser::Result<Self> {
-            Ok(PseudoMutex::new(T::deser(tracker)?))
-        }
-    }
-}
-
-/// Cover `derive` variaty
-
-#[derive(Clone, Interact)]
-struct Foo {
-    a: u32,
-    b: u32,
-}
-
-#[derive(Clone, Interact)]
-struct Foo2(u32, u32);
-
-#[derive(Clone, Interact)]
-struct State {
-    u: u32,
-    opt: Option<Foo>,
-    op2: Option<u32>,
-    foo: Foo,
-    test: Arc<Mutex<Foo>>,
-    v: Vec<u32>,
-    m: BTreeMap<u32, u32>,
+struct Context {
+    count: usize,
+    check: bool,
 }
 
 macro_rules! verify {
@@ -132,12 +19,17 @@ macro_rules! verify {
                 println!("");
                 println!("Failed:");
                 println!("");
-                println!("verify!(self, {} => {:?});", stringify!($e), str_e);
+                println!("verify!(self, {} => {:?});", stringify!($e), $result);
                 println!("");
 
-                let result = std::panic::catch_unwind(|| {
+                let _ = std::panic::catch_unwind(|| {
                     assert_eq!(str_e, $result);
                 });
+
+                println!("Correct this by having:");
+                println!("");
+                println!("verify!(self, {} => {:?});", stringify!($e), str_e);
+                println!("");
 
                 $self.count += 1;
             }
@@ -147,55 +39,70 @@ macro_rules! verify {
     };
 }
 
-struct Context {
-    count: usize,
-    check: bool,
+#[test]
+fn main() {
+    let mut context = Context {
+        count: 0,
+        check: true,
+    };
+    context.main();
+
+    if context.count > 0 {
+        {
+            println!();
+            println!("Expected test manifest:");
+            println!();
+            let mut context = Context {
+                count: 0,
+                check: false,
+            };
+            context.main();
+            println!();
+        }
+
+        panic!("A total of {} verification tests failed", context.count)
+    }
 }
 
 #[rustfmt::skip]
 impl Context {
     fn main(&mut self) {
-        let mut state = State {
-            u: 10,
-            opt: Some(Foo { a: 10, b: 100 }),
-            op2: None,
-            foo: Foo { a: 2, b: 4 },
-            test: Arc::new(Mutex::new(Foo { a: 10, b: 100 })),
-            v: vec![1, 2, 3],
-            m: {
-                let mut bm = BTreeMap::new();
-                bm.insert(3, 4);
-                bm.insert(7, 8);
-                bm
-            },
+        let mut root = interact::RootSend::new();
+        let mut root_local = interact::RootLocal::new();
+        let seed = 42;
+        let mut rng: rand::StdRng = rand::SeedableRng::seed_from_u64(seed);
+
+        root.owned.insert("complex", Box::new(Complex::new_random(&mut rng)));
+        root.owned.insert("basic", Box::new(Basic::new_random(&mut rng)));
+        root_local.owned.insert("rc_loops", Box::new(LocalRcLoop::new_random(&mut rng)));
+
+        let mut root = interact::Root {
+            send: Some(&mut root),
+            local: Some(&mut root_local),
         };
 
-        let mut root = interact::RootSend::new();
-        root.owned.insert("state", Box::new(state));
-        let mut root = root.as_root();
+        // Check for a non-existing root key
 
-        println!("");
+        verify!(self, root.access("not_existing") => "(Err(MissingStartComponent), Assist { valid: 0, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
 
-        verify!(self, root.access("state.u") => "(Ok(NodeTree { info: Leaf(\"10\"), meta: Some(Wrap(1)), size: 3 }), Assist { valid: 7, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
-        verify!(self, root.access("state.nonexist") => "(Err(UnexpectedToken), Assist { valid: 5, pending: 1, pending_special: 0, next_options: Avail(1, []) })");
-        verify!(self, root.access("state.m") => "(Ok(NodeTree { info: Named(NodeTree { info: Leaf(\"BTreeMap\"), meta: None, size: 9 }, NodeTree { info: Grouped(\'{\', NodeTree { info: Delimited(\',\', [NodeTree { info: Tuple(NodeTree { info: Leaf(\"3\"), meta: Some(Wrap(1)), size: 2 }, \":\", NodeTree { info: Leaf(\"4\"), meta: Some(Wrap(1)), size: 2 }), meta: None, size: 8 }, NodeTree { info: Tuple(NodeTree { info: Leaf(\"7\"), meta: Some(Wrap(1)), size: 2 }, \":\", NodeTree { info: Leaf(\"8\"), meta: Some(Wrap(1)), size: 2 }), meta: None, size: 8 }]), meta: None, size: 21 }, \'}\'), meta: None, size: 24 }), meta: Some(Wrap(1)), size: 34 }), Assist { valid: 7, pending: 0, pending_special: 0, next_options: Avail(0, [\".len(\", \"[\"]) })");
-        verify!(self, root.access("state.m[3]") => "(Ok(NodeTree { info: Leaf(\"4\"), meta: Some(Wrap(1)), size: 2 }), Assist { valid: 10, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
-        verify!(self, root.access("state.m.len()") => "(Ok(NodeTree { info: Leaf(\"2\"), meta: Some(Wrap(1)), size: 2 }), Assist { valid: 13, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        // Check for a basic read query
 
-        if self.count > 0 {
-            panic!("A total of {} verification tests failed", self.count)
-        }
+        verify!(self, root.access("basic.u_16") => "(Ok(NodeTree { info: Leaf(\"50158\"), meta: Some(Wrap(1)), size: 6 }), Assist { valid: 10, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("basic.u_") => "(Err(UnexpectedToken), Assist { valid: 5, pending: 3, pending_special: 0, next_options: Avail(1, [\"u_s\", \"u_64\", \"u_32\", \"u_16\", \"u_8\"]) })");
+
+        // Basic assignment check
+
+        verify!(self, root.access("basic.u_64 = 1234") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 17, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("basic.u_64") => "(Ok(NodeTree { info: Leaf(\"1234\"), meta: Some(Wrap(1)), size: 5 }), Assist { valid: 10, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+
+        // Verify calling immutable methods from prompt
+
+        verify!(self, root.access("complex.tuple.0.0 = 3") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 21, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("complex.tuple_1.0 = 3") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 21, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("complex.check()") => "(Ok(NodeTree { info: Leaf(\"true\"), meta: Some(Wrap(1)), size: 5 }), Assist { valid: 15, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("complex.tuple_1.0 = 4") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 21, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+        verify!(self, root.access("complex.check()") => "(Ok(NodeTree { info: Leaf(\"false\"), meta: Some(Wrap(1)), size: 6 }), Assist { valid: 15, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+
+        // TODO: add more comparision tests
     }
-}
-
-#[test]
-fn main() {
-    let mut context = Context {
-        count: 0,
-        check: false,
-    };
-    context.main();
-
-    context.check = true;
-    context.main();
 }

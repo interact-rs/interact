@@ -22,3 +22,4 @@ ansi_term = "0.11"
 [dev-dependencies]
 structopt = "0.2"
 structopt-derive = "0.2"
+rand = "=0.5"

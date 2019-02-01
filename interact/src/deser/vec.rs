@@ -4,10 +4,12 @@ impl<T> Deser for &[T] where T: Deser {}
 
 impl<T> Deser for &mut [T] where T: Deser {}
 
+// TODO: implement
 impl<T> Deser for Vec<T> where T: Deser {}
 
 macro_rules! sized_iter {
     ($t:ty) => {
+        // TODO: implement
         impl<T> Deser for $t where T: Deser {}
     };
 }

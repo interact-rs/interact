@@ -4,7 +4,7 @@ use crate::{
     tokens::parse_to_tokens, Access, Assist, ClimbError, Climber, NextOptions, NodeTree, Token,
 };
 
-/// Holds a root dictionary of `Send`-able trait objects that implement `Access` and are therefor
+/// Holds a root dictionary of `Send`-able trait objects that implement `Access` and are therefore
 /// Interact-able. These are most likely objects that are held globally behind an `Arc`.
 #[derive(Default)]
 pub struct RootSend {

@@ -1,6 +1,6 @@
 # Interact
 
-Interact is a Rust framework for friendly online introspection of the running program state in an intuitive command-line *interact*ive way.
+[Interact](https://github.com/interact-rs/interact) is a Rust framework for friendly online introspection of the running program state in an intuitive command-line *interact*ive way.
 
 Interact is useful for server programs that otherwise receive no input. You can use Interact to make your server receive commands using the special prompt from the `interact_prompt` crate. The commands can be used to browse your server's internal state, modify it, and call method functions that were specified in `interact` derive attributes.
 

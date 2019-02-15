@@ -23,7 +23,7 @@ struct Baz(u32);
 
 impl Baz {
 	fn add(&mut self, param_a: u32) {
-        self.baz += param_a;
+        self.0 += param_a;
     }
 }
 ```

@@ -6,6 +6,7 @@
 	- [Alacritty](examples/alacritty.md)
 - [Using derive](using-derive.md)
 	- [Attributes](attributes.md)
+- [Registering data](registering-data.md)
 - [Using the prompt](using-prompt.md)
     - [Accessing data](access-data.md)
     - [Modifying data](modify-data.md)

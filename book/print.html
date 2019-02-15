@@ -426,10 +426,10 @@ None
 <a class="header" href="#access-via-mutex-rc-arc-refcell-box" id="access-via-mutex-rc-arc-refcell-box"><h2>Access via <code>Mutex</code>, <code>Rc</code>, <code>Arc</code>, <code>RefCell</code>, <code>Box</code></h2></a>
 <p>Interact elides complexity to access paths when wrapper types are used. For Mutex, it uses <code>.try_lock()</code> behind the scenes. For <code>RefCell</code> it uses <code>try_borrow()</code>.</p>
 <a class="header" href="#modifying-data" id="modifying-data"><h1>Modifying data</h1></a>
-<p>For types that expose a mutable interface, for example via <code>Arc&lt;Mutex&lt;_&gt;&gt;</code>, can have their fields be assigned.</p>
+<p>Types that expose a mutable interface, for example via <code>Arc&lt;Mutex&lt;_&gt;&gt;</code>, can have their fields be assigned and modified from the Interact prompt.</p>
 <p>Interact knows the basic types, and is also able to construct values of derived types for which the <code>#[interact(skip)]</code> attribute was <em>not</em> used for any field.</p>
 <a class="header" href="#assignments" id="assignments"><h2>Assignments</h2></a>
-<p>Assignments are done using <code>=</code> at the prompts.</p>
+<p>Assignments are done using <code>=</code> at the prompt.</p>
 <p>For example, check <code>cargo run --example large-example</code>:</p>
 <pre><code class="language-rust ignore">&gt;&gt;&gt; complex.tuple
 ((690498389, VarUnit, (193, 38)), 1262478744)

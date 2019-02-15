@@ -1,12 +1,12 @@
 # Modifying data
 
-For types that expose a mutable interface, for example via `Arc<Mutex<_>>`, can have their fields be assigned.
+Types that expose a mutable interface, for example via `Arc<Mutex<_>>`, can have their fields be assigned and modified from the Interact prompt.
 
 Interact knows the basic types, and is also able to construct values of derived types for which the `#[interact(skip)]` attribute was _not_ used for any field.
 
 ## Assignments
 
-Assignments are done using `=` at the prompts.
+Assignments are done using `=` at the prompt.
 
 For example, check `cargo run --example large-example`:
 

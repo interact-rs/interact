@@ -1,7 +1,7 @@
 //! Interact
 //!
 //! Interact is a framework for friendly online introspection of the running program state in an
-//! intuitive command-line ***interact***ive way.
+//! intuitive command-line interactive way.
 //!
 //! While dynamically-typed interpreted languages offer the advantage of allowing to look at a
 //! running program state using a prompt, compiled languages often do not provide that feature.

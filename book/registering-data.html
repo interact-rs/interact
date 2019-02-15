@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Accessing data - Interact</title>
+        <title>Registering data - Interact</title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -75,7 +75,7 @@
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><a href="examples.html"><strong aria-hidden="true">2.</strong> Examples</a></li><li><ol class="section"><li><a href="examples/actix.html"><strong aria-hidden="true">2.1.</strong> Actix chat server</a></li><li><a href="examples/alacritty.html"><strong aria-hidden="true">2.2.</strong> Alacritty</a></li></ol></li><li><a href="using-derive.html"><strong aria-hidden="true">3.</strong> Using derive</a></li><li><ol class="section"><li><a href="attributes.html"><strong aria-hidden="true">3.1.</strong> Attributes</a></li></ol></li><li><a href="registering-data.html"><strong aria-hidden="true">4.</strong> Registering data</a></li><li><a href="using-prompt.html"><strong aria-hidden="true">5.</strong> Using the prompt</a></li><li><ol class="section"><li><a href="access-data.html" class="active"><strong aria-hidden="true">5.1.</strong> Accessing data</a></li><li><a href="modify-data.html"><strong aria-hidden="true">5.2.</strong> Modifying data</a></li><li><a href="calling-methods.html"><strong aria-hidden="true">5.3.</strong> Calling methods</a></li></ol></li></ol>
+            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><a href="examples.html"><strong aria-hidden="true">2.</strong> Examples</a></li><li><ol class="section"><li><a href="examples/actix.html"><strong aria-hidden="true">2.1.</strong> Actix chat server</a></li><li><a href="examples/alacritty.html"><strong aria-hidden="true">2.2.</strong> Alacritty</a></li></ol></li><li><a href="using-derive.html"><strong aria-hidden="true">3.</strong> Using derive</a></li><li><ol class="section"><li><a href="attributes.html"><strong aria-hidden="true">3.1.</strong> Attributes</a></li></ol></li><li><a href="registering-data.html" class="active"><strong aria-hidden="true">4.</strong> Registering data</a></li><li><a href="using-prompt.html"><strong aria-hidden="true">5.</strong> Using the prompt</a></li><li><ol class="section"><li><a href="access-data.html"><strong aria-hidden="true">5.1.</strong> Accessing data</a></li><li><a href="modify-data.html"><strong aria-hidden="true">5.2.</strong> Modifying data</a></li><li><a href="calling-methods.html"><strong aria-hidden="true">5.3.</strong> Calling methods</a></li></ol></li></ol>
         </nav>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -140,66 +140,32 @@
 
                 <div id="content" class="content">
                     <main>
-                        <a class="header" href="#accessing-data" id="accessing-data"><h1>Accessing data</h1></a>
-<a class="header" href="#whole-state" id="whole-state"><h2>Whole state</h2></a>
-<p>Suppose a value of the following simple state is registered:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-#[derive(Interact)]
-struct Point {
-    x: u32,
-    y: u32,
+                        <a class="header" href="#registering-data" id="registering-data"><h1>Registering data</h1></a>
+<p>The <code>interact_prompt</code> crate provides helpers for registering data to be examined. Currently, data must be owned, so if it is shared by threads running in the background in parallel to the prompt, it needs to be provided using <code>Arc&lt;_&gt;</code>. If the data is expeced to be shared <em>and</em> mutable by the Interact prompt, then it should be wrapped in <code>Arc&lt;Mutex&lt;_&gt;&gt;</code>.</p>
+<p>For example:</p>
+<pre><code class="language-rust ignore">use interact_prompt::{SendRegistry};
+
+fn register_global_mutable_data(global_state: Arc&lt;Mutex&lt;MyData&gt;&gt;) {
+    SendRegistry::insert(&quot;global&quot;, Box::new(global_state));
 }
-#}</code></pre></pre>
-<p>The whole of it can be printed, and the result is similar to a pretty printed <code>Debug</code>:</p>
-<pre><code class="language-shell">&gt;&gt;&gt; state
-Point { x: 3, y: 4 }
-</code></pre>
-<p>Tuple structs are accessed similarly using Rust's <code>.0</code>, <code>.1</code>, etc.</p>
-<a class="header" href="#field-access" id="field-access"><h2>Field access</h2></a>
-<p>The syntax for field access is similar to Rust's. For example, accessing one of the fields of the previous example:</p>
-<pre><code class="language-shell">&gt;&gt;&gt; state.x
-3
-</code></pre>
-<a class="header" href="#enum-access" id="enum-access"><h2>Enum access</h2></a>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-struct OptPoint {
-    x: Option&lt;u32&gt;,
-    y: Option&lt;u32&gt;,
+
+fn register_global_readable_data(readonly: Arc&lt;MyData&gt;) {
+    SendRegistry::insert(&quot;readonly&quot;, Box::new(readonly));
 }
-#}</code></pre></pre>
-<p>Suppose that we have an instance of this struct with the following value:</p>
-<p><code>OptPoint { x: None, y: Some(3) }</code></p>
-<p>Unlike in Rust, we can have a full path to the variant's value through variant's name:</p>
-<pre><code class="language-shell">&gt;&gt;&gt; state.y.Some
-(3)
-&gt;&gt;&gt; state.y.Some.0
-3
-&gt;&gt;&gt; state.x
-None
-&gt;&gt;&gt; basic.x.None
-None
 </code></pre>
-<a class="header" href="#vec-hashmap-and-btreemap-access" id="vec-hashmap-and-btreemap-access"><h2>Vec, HashMap, and BTreeMap access</h2></a>
-<p>Accessing vectors and maps are done like you'd expected via <code>[]</code>. Currently, ranges are <em>not</em> supported in vectors and sorted maps.</p>
-<a class="header" href="#access-via-mutex-rc-arc-refcell-box" id="access-via-mutex-rc-arc-refcell-box"><h2>Access via <code>Mutex</code>, <code>Rc</code>, <code>Arc</code>, <code>RefCell</code>, <code>Box</code></h2></a>
-<p>Interact elides complexity to access paths when wrapper types are used. For Mutex, it uses <code>.try_lock()</code> behind the scenes. For <code>RefCell</code> it uses <code>try_borrow()</code>.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="using-prompt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="attributes.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
                         
-                            <a rel="next" href="modify-data.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="using-prompt.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -211,13 +177,13 @@ None
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a href="using-prompt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a href="attributes.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
                 
-                    <a href="modify-data.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a href="using-prompt.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 

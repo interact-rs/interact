@@ -75,7 +75,7 @@
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><a href="examples.html"><strong aria-hidden="true">2.</strong> Examples</a></li><li><ol class="section"><li><a href="examples/actix.html"><strong aria-hidden="true">2.1.</strong> Actix chat server</a></li><li><a href="examples/alacritty.html"><strong aria-hidden="true">2.2.</strong> Alacritty</a></li></ol></li><li><a href="using-derive.html"><strong aria-hidden="true">3.</strong> Using derive</a></li><li><ol class="section"><li><a href="attributes.html"><strong aria-hidden="true">3.1.</strong> Attributes</a></li></ol></li><li><a href="using-prompt.html"><strong aria-hidden="true">4.</strong> Using the prompt</a></li><li><ol class="section"><li><a href="access-data.html"><strong aria-hidden="true">4.1.</strong> Accessing data</a></li><li><a href="modify-data.html"><strong aria-hidden="true">4.2.</strong> Modifying data</a></li><li><a href="calling-methods.html" class="active"><strong aria-hidden="true">4.3.</strong> Calling methods</a></li></ol></li></ol>
+            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><a href="examples.html"><strong aria-hidden="true">2.</strong> Examples</a></li><li><ol class="section"><li><a href="examples/actix.html"><strong aria-hidden="true">2.1.</strong> Actix chat server</a></li><li><a href="examples/alacritty.html"><strong aria-hidden="true">2.2.</strong> Alacritty</a></li></ol></li><li><a href="using-derive.html"><strong aria-hidden="true">3.</strong> Using derive</a></li><li><ol class="section"><li><a href="attributes.html"><strong aria-hidden="true">3.1.</strong> Attributes</a></li></ol></li><li><a href="registering-data.html"><strong aria-hidden="true">4.</strong> Registering data</a></li><li><a href="using-prompt.html"><strong aria-hidden="true">5.</strong> Using the prompt</a></li><li><ol class="section"><li><a href="access-data.html"><strong aria-hidden="true">5.1.</strong> Accessing data</a></li><li><a href="modify-data.html"><strong aria-hidden="true">5.2.</strong> Modifying data</a></li><li><a href="calling-methods.html" class="active"><strong aria-hidden="true">5.3.</strong> Calling methods</a></li></ol></li></ol>
         </nav>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -141,7 +141,26 @@
                 <div id="content" class="content">
                     <main>
                         <a class="header" href="#calling-methods" id="calling-methods"><h1>Calling methods</h1></a>
-<p><em>TODO</em></p>
+<p>By specifying Interact's special <code>mut_fn</code> or <code>immut_fn</code> <a href="attributes.html#container-attributes">container attributes</a>, you can add methods that would be reachable from the Interact prompt, upon reaching values that match the types on which the special methods are defined.</p>
+<p>For example, given the following type:</p>
+<pre><code class="language-rust ignore">#[derive(Interact)]
+#[interact(mut_fn(add(param_a)))]
+struct Baz(u32);
+
+impl Baz {
+    fn add(&amp;mut self, param_a: u32) {
+        self.0 += param_a;
+    }
+}
+</code></pre>
+<p>We can call the <code>add</code> methods:</p>
+<pre><code class="language-rust ignore">&gt;&gt;&gt; state.baz_val
+Baz (1)
+
+&gt;&gt;&gt; state.baz_val.add(3)
+&gt;&gt;&gt; state.baz_val
+Baz (4)
+</code></pre>
 
                     </main>
 

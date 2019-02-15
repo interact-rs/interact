@@ -75,7 +75,7 @@
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><a href="examples.html"><strong aria-hidden="true">2.</strong> Examples</a></li><li><ol class="section"><li><a href="examples/actix.html"><strong aria-hidden="true">2.1.</strong> Actix chat server</a></li><li><a href="examples/alacritty.html"><strong aria-hidden="true">2.2.</strong> Alacritty</a></li></ol></li><li><a href="using-derive.html"><strong aria-hidden="true">3.</strong> Using derive</a></li><li><ol class="section"><li><a href="attributes.html"><strong aria-hidden="true">3.1.</strong> Attributes</a></li></ol></li><li><a href="using-prompt.html"><strong aria-hidden="true">4.</strong> Using the prompt</a></li><li><ol class="section"><li><a href="access-data.html"><strong aria-hidden="true">4.1.</strong> Accessing data</a></li><li><a href="modify-data.html"><strong aria-hidden="true">4.2.</strong> Modifying data</a></li><li><a href="calling-methods.html"><strong aria-hidden="true">4.3.</strong> Calling methods</a></li></ol></li></ol>
+            <ol class="chapter"><li><a href="index.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li><a href="examples.html"><strong aria-hidden="true">2.</strong> Examples</a></li><li><ol class="section"><li><a href="examples/actix.html"><strong aria-hidden="true">2.1.</strong> Actix chat server</a></li><li><a href="examples/alacritty.html"><strong aria-hidden="true">2.2.</strong> Alacritty</a></li></ol></li><li><a href="using-derive.html"><strong aria-hidden="true">3.</strong> Using derive</a></li><li><ol class="section"><li><a href="attributes.html"><strong aria-hidden="true">3.1.</strong> Attributes</a></li></ol></li><li><a href="registering-data.html"><strong aria-hidden="true">4.</strong> Registering data</a></li><li><a href="using-prompt.html"><strong aria-hidden="true">5.</strong> Using the prompt</a></li><li><ol class="section"><li><a href="access-data.html"><strong aria-hidden="true">5.1.</strong> Accessing data</a></li><li><a href="modify-data.html"><strong aria-hidden="true">5.2.</strong> Modifying data</a></li><li><a href="calling-methods.html"><strong aria-hidden="true">5.3.</strong> Calling methods</a></li></ol></li></ol>
         </nav>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -332,7 +332,7 @@ struct Baz(u32);
 
 impl Baz {
     fn add(&amp;mut self, param_a: u32) {
-        self.baz += param_a;
+        self.0 += param_a;
     }
 }
 #}</code></pre></pre>
@@ -343,8 +343,22 @@ impl Baz {
 <p>The downside is that having any skipped field on a type means that it is
 unbuildable, and therefore cannot be passed as value to functions or to be
 assigned using <code>=</code> in an expression.</p>
+<a class="header" href="#registering-data" id="registering-data"><h1>Registering data</h1></a>
+<p>The <code>interact_prompt</code> crate provides helpers for registering data to be examined. Currently, data must be owned, so if it is shared by threads running in the background in parallel to the prompt, it needs to be provided using <code>Arc&lt;_&gt;</code>. If the data is expeced to be shared <em>and</em> mutable by the Interact prompt, then it should be wrapped in <code>Arc&lt;Mutex&lt;_&gt;&gt;</code>.</p>
+<p>For example:</p>
+<pre><code class="language-rust ignore">use interact_prompt::{SendRegistry};
+
+fn register_global_mutable_data(global_state: Arc&lt;Mutex&lt;MyData&gt;&gt;) {
+    SendRegistry::insert(&quot;global&quot;, Box::new(global_state));
+}
+
+fn register_global_readable_data(readonly: Arc&lt;MyData&gt;) {
+    SendRegistry::insert(&quot;readonly&quot;, Box::new(readonly));
+}
+</code></pre>
 <a class="header" href="#using-the-prompt" id="using-the-prompt"><h1>Using the prompt</h1></a>
-<p><em>TODO</em></p>
+<p>The Interact prompt lets the user probe the registered data, and possibly to modify it to some degree.</p>
+<p>This section provides various examples for what is possible at the prompt.</p>
 <a class="header" href="#accessing-data" id="accessing-data"><h1>Accessing data</h1></a>
 <a class="header" href="#whole-state" id="whole-state"><h2>Whole state</h2></a>
 <p>Suppose a value of the following simple state is registered:</p>
@@ -393,9 +407,53 @@ None
 <a class="header" href="#access-via-mutex-rc-arc-refcell-box" id="access-via-mutex-rc-arc-refcell-box"><h2>Access via <code>Mutex</code>, <code>Rc</code>, <code>Arc</code>, <code>RefCell</code>, <code>Box</code></h2></a>
 <p>Interact elides complexity to access paths when wrapper types are used. For Mutex, it uses <code>.try_lock()</code> behind the scenes. For <code>RefCell</code> it uses <code>try_borrow()</code>.</p>
 <a class="header" href="#modifying-data" id="modifying-data"><h1>Modifying data</h1></a>
-<p><em>TODO</em></p>
+<p>For types that expose a mutable interface, for example via <code>Arc&lt;Mutex&lt;_&gt;&gt;</code>, can have their fields be assigned.</p>
+<p>Interact knows the basic types, and is also able to construct values of derived types for which the <code>#[interact(skip)]</code> attribute was <em>not</em> used for any field.</p>
+<a class="header" href="#assignments" id="assignments"><h2>Assignments</h2></a>
+<p>Assignments are done using <code>=</code> at the prompts.</p>
+<p>For example, check <code>cargo run --example large-example</code>:</p>
+<pre><code class="language-rust ignore">&gt;&gt;&gt; complex.tuple
+((690498389, VarUnit, (193, 38)), 1262478744)
+
+&gt;&gt;&gt; complex.tuple.0.2
+(193, 38)
+
+&gt;&gt;&gt; complex.tuple.0.2 = (1, 1)
+&gt;&gt;&gt; complex.tuple
+((690498389, VarUnit, (1, 1)), 1262478744)
+
+&gt;&gt;&gt; complex.tuple.0.1 = VarNamed { a: 3, b: 10}
+&gt;&gt;&gt; complex.tuple
+((690498389, VarNamed { a: 3, b: 10 }, (1, 1)), 1262478744)
+</code></pre>
+<a class="header" href="#wrapper-types" id="wrapper-types"><h2>Wrapper types</h2></a>
+<p>The wrapper types <code>Rc</code>, <code>RefCell</code>, <code>Mutex</code>, <code>Box</code> are transparent to construction of values, and need not be specified.</p>
+<pre><code class="language-rust ignore">&gt;&gt;&gt; complex.boxed = VarNamed { a: 3, b: 10}
+
+&gt;&gt;&gt; complex.boxed
+VarNamed { a: 3, b: 10 }
+</code></pre>
 <a class="header" href="#calling-methods" id="calling-methods"><h1>Calling methods</h1></a>
-<p><em>TODO</em></p>
+<p>By specifying Interact's special <code>mut_fn</code> or <code>immut_fn</code> <a href="attributes.html#container-attributes">container attributes</a>, you can add methods that would be reachable from the Interact prompt, upon reaching values that match the types on which the special methods are defined.</p>
+<p>For example, given the following type:</p>
+<pre><code class="language-rust ignore">#[derive(Interact)]
+#[interact(mut_fn(add(param_a)))]
+struct Baz(u32);
+
+impl Baz {
+    fn add(&amp;mut self, param_a: u32) {
+        self.0 += param_a;
+    }
+}
+</code></pre>
+<p>We can call the <code>add</code> methods:</p>
+<pre><code class="language-rust ignore">&gt;&gt;&gt; state.baz_val
+Baz (1)
+
+&gt;&gt;&gt; state.baz_val.add(3)
+&gt;&gt;&gt; state.baz_val
+Baz (4)
+</code></pre>
 
                     </main>
 

@@ -143,6 +143,25 @@
                         <a class="header" href="#interact" id="interact"><h1>Interact</h1></a>
 <p>Interact is a Rust framework for friendly online introspection of the running program state in an intuitive command-line <em>interact</em>ive way.</p>
 <p>Interact is useful for server programs that otherwise receive no input. You can use Interact to make your server receive commands using the special prompt from the <code>interact_prompt</code> crate. The commands can be used to browse your server's internal state, modify it, and call method functions that were specified in <code>interact</code> derive attributes.</p>
+<a class="header" href="#reference" id="reference"><h2>Reference</h2></a>
+<ul>
+<li>
+<p>Crate docs of <b>latest</b> release:</p>
+<ul>
+<li><a href="https://docs.rs/interact">interact</a> <img src="https://img.shields.io/crates/v/interact.svg" alt="x" /></li>
+<li><a href="https://docs.rs/interact_prompt">interact_prompt</a> <img src="https://img.shields.io/crates/v/interact_prompt.svg" alt="x" /></li>
+<li><a href="https://docs.rs/interact_derive">interact_derive</a> <img src="https://img.shields.io/crates/v/interact_derive.svg" alt="x" /></li>
+</ul>
+</li>
+<li>
+<p>Crate docs of <b>master (possibly unreleased)</b> version:</p>
+<ul>
+<li><a href="https://interact-rs.github.io/interact/doc/interact/index.html">interact</a></li>
+<li><a href="https://interact-rs.github.io/interact/doc/interact_prompt/index.html">interact_prompt</a></li>
+<li><a href="https://interact-rs.github.io/interact/doc/interact_derive/index.html">interact_derive</a></li>
+</ul>
+</li>
+</ul>
 <a class="header" href="#design" id="design"><h2>Design</h2></a>
 <p>Using two traits, <code>Access</code> and <code>Deser</code>, Interact exposes types as trait objects, similarly to the <code>Any</code> trait, but with a functionality of reflection. The <code>Access</code> trait allows to probe the fields of structs and enums and modify them. It also allows to iterate arrays, vectors, and maps. It also allows to safely punch through <code>Rc</code>, <code>Arc</code>, and  <code>Mutex</code>. The traits can be derived using <code>#[derive(Interact)]</code>.</p>
 <p>At the prompt side, predictive parsing is used for providing full auto-complete and hinting, while constructing access paths, and while constructing values used in field assignments and function calls.</p>

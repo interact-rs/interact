@@ -1,7 +1,5 @@
 //! Interact Prompt
 //!
-//! **NOTE: API is unstable and subject to change.**
-//!
 //! In high-level, to use Interact Prompt you need:
 //!
 //! 1) Deriving of `Interact` over types.

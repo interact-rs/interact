@@ -1,7 +1,4 @@
 //! Interact Prompt registry for accessible state.
-//!
-//! NOTE: API is unstable and subject to change.
-//!
 
 use std::cell::RefCell;
 use std::sync::Mutex;

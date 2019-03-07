@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 /// Here we define types and data to be used in tests and examples.
 pub mod pseudo_mutex;
 mod random;

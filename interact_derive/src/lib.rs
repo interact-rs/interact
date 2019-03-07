@@ -3,8 +3,8 @@ extern crate proc_macro;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use proc_macro2::{Delimiter, TokenNode, TokenTree};
-use quote::Tokens;
+use proc_macro2::TokenStream as Tokens;
+use proc_macro2::{Delimiter, Ident, Span, TokenTree};
 use std::collections::{BTreeMap, HashSet};
 use std::process::Command;
 use syn::Meta::{List, Word};
@@ -101,9 +101,9 @@ pub fn derive_interact_basic(input: TokenStream) -> TokenStream {
 
 fn derive_interact_inner(input: TokenStream, info: DeriveInfo) -> TokenStream {
     let input: DeriveInput = syn::parse(input).unwrap();
-    let name = input.ident;
+    let name = &input.ident;
 
-    let expanded = inner_derive_interact(input, info);
+    let expanded = inner_derive_interact(&input, info);
 
     if let Some((_, value)) =
         std::env::vars().find(|(key, _)| key.as_str() == "INTERACT_DERIVE_SAVE_DIR")
@@ -115,8 +115,8 @@ fn derive_interact_inner(input: TokenStream, info: DeriveInfo) -> TokenStream {
     expanded.into()
 }
 
-fn inner_derive_interact(input: DeriveInput, info: DeriveInfo) -> Tokens {
-    let name = input.ident;
+fn inner_derive_interact(input: &DeriveInput, info: DeriveInfo) -> Tokens {
+    let name = &input.ident;
     let kr = if info.from_interact {
         quote! { crate }
     } else {
@@ -131,7 +131,7 @@ fn inner_derive_interact(input: DeriveInput, info: DeriveInfo) -> Tokens {
     } else {
         quote! {use super::#name;}
     };
-    let module_name = syn::Ident::from(format!("impls_for_{}", name));
+    let module_name = Ident::new(&format!("impls_for_{}", name), Span::call_site());
 
     quote! {
         mod #module_name {
@@ -162,18 +162,10 @@ fn fill_skip_bound_from_attr(attribute: Option<TokenTree>, skip_bound_set: &mut 
         panic!("Expected a token tree after skip_bound term");
     };
 
-    if let TokenTree {
-        kind: TokenNode::Group(Delimiter::Parenthesis, ts),
-        ..
-    } = tt
-    {
-        let mut ts = ts.clone().into_iter();
-        if let Some(TokenTree {
-            kind: TokenNode::Term(s),
-            ..
-        }) = ts.next()
-        {
-            skip_bound_set.insert(String::from(s.as_str()));
+    if let TokenTree::Group(group) = tt {
+        let mut ts = group.stream().into_iter();
+        if let Some(TokenTree::Ident(s)) = ts.next() {
+            skip_bound_set.insert(s.to_string());
         } else {
             panic!("Expected term in attribute");
         }
@@ -187,34 +179,22 @@ fn get_attr_info(
     mut_assign: &mut bool,
 ) {
     for func in attribute.tts.clone().into_iter() {
-        let ts = match func {
-            TokenTree {
-                kind: TokenNode::Op('=', _),
-                ..
-            }
-            | TokenTree {
-                kind: TokenNode::Literal(_),
-                ..
-            } => {
+        let ts = match &func {
+            TokenTree::Punct(_punct) => {
                 // Skip comments
                 continue;
             }
-            TokenTree {
-                kind: TokenNode::Group(Delimiter::Parenthesis, ts),
-                ..
-            } => ts,
+            TokenTree::Group(group) if group.delimiter() == Delimiter::Parenthesis => {
+                group.stream()
+            }
             _ => {
                 panic!("extend () in `interact` data type attribute `{:?}`", func);
             }
         };
 
         let mut ts = ts.clone().into_iter();
-        let mutability_term = if let Some(TokenTree {
-            kind: TokenNode::Term(mutability_term),
-            ..
-        }) = ts.next()
-        {
-            mutability_term
+        let mutability_term = if let Some(TokenTree::Ident(term)) = ts.next() {
+            term.to_string()
         } else {
             panic!("expected mut_fn/immut_fn term in data type attribute")
         };
@@ -246,68 +226,60 @@ fn get_attr_info(
             );
         };
 
-        if let TokenTree {
-            kind: TokenNode::Group(Delimiter::Parenthesis, ts),
-            ..
-        } = fn_def
-        {
-            let mut ts = ts.clone().into_iter();
-            let fn_name = if let Some(TokenTree {
-                kind: TokenNode::Term(s),
-                ..
-            }) = ts.next()
-            {
-                s
-            } else {
-                panic!("Expected term in attribute `{}`", attribute.tts.to_string());
-            };
+        if let TokenTree::Group(group) = fn_def {
+            if group.delimiter() == Delimiter::Parenthesis {
+                let mut ts = group.stream().into_iter();
 
-            let name = String::from(fn_name.as_str());
-            let mut func = Function {
-                name: name.clone(),
-                mutability,
-                args: vec![],
-            };
+                let fn_name = if let Some(TokenTree::Ident(term)) = ts.next() {
+                    term.to_string()
+                } else {
+                    panic!("Expected term in attribute `{}`", attribute.tts.to_string());
+                };
 
-            let fn_def = if let Some(fn_def) = ts.next() {
-                fn_def
-            } else {
-                panic!(
-                    "Expected parameter specification () after {} in `{}`",
-                    fn_name.as_str(),
-                    attribute.tts.to_string()
-                );
-            };
+                let name = String::from(fn_name.as_str());
+                let mut func = Function {
+                    name: name.clone(),
+                    mutability,
+                    args: vec![],
+                };
 
-            if let TokenTree {
-                kind: TokenNode::Group(Delimiter::Parenthesis, ts),
-                ..
-            } = fn_def
-            {
-                for tt in ts.clone().into_iter() {
-                    if let TokenTree {
-                        kind: TokenNode::Term(s),
-                        ..
-                    } = tt
-                    {
-                        func.args.push(String::from(s.as_str()));
-                    } else if let TokenTree {
-                        kind: TokenNode::Op(',', _),
-                        ..
-                    } = tt
-                    {
-                        /* Ok */
-                    } else {
-                        panic!("Unexpected parameter token {:?}", tt);
+                let fn_def = if let Some(fn_def) = ts.next() {
+                    fn_def
+                } else {
+                    panic!(
+                        "Expected parameter specification () after {} in `{}`",
+                        fn_name.as_str(),
+                        attribute.tts.to_string()
+                    );
+                };
+
+                if let TokenTree::Group(group) = fn_def {
+                    if group.delimiter() == Delimiter::Parenthesis {
+                        for tt in group.stream().into_iter() {
+                            if let TokenTree::Ident(term) = tt {
+                                func.args.push(term.to_string());
+                            } else if let TokenTree::Punct(ref punc) = tt {
+                                if punc.as_char() == ',' {
+                                    continue;
+                                } else {
+                                    panic!("Unexpected parameter token {:?}", tt);
+                                }
+                            } else {
+                                panic!(
+                                    "Expected term in attribute `{}`",
+                                    attribute.tts.to_string()
+                                );
+                            }
+                        }
                     }
                 }
-            }
 
-            if map.get(&name).is_some() {
-                panic!("Duplicate name {}", name.as_str());
-            }
+                if map.get(&name).is_some() {
+                    panic!("Duplicate name {}", name.as_str());
+                }
 
-            map.insert(name, func);
+                map.insert(name, func);
+            }
         }
     }
 }
@@ -318,7 +290,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
 
     for func in fnmap.values() {
         let name = &func.name;
-        let name_ident = syn::Ident::from(name.as_str());
+        let name_ident = Ident::new(name.as_str(), Span::call_site());
         let mut match_vec = vec![];
         let mut arg_vec = vec![];
         let mut arg_vec_unpack = vec![];
@@ -327,16 +299,16 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
         for arg in &func.args {
             arg_str_vec.push(arg.as_str());
             match_vec.push({
-                let v = syn::token::Underscore::new(proc_macro2::Span::call_site());
+                let v = syn::token::Underscore::default();
                 if func.args.len() == 1 {
                     quote! { #v, }
                 } else {
                     quote! { #v }
                 }
             });
-            arg_vec.push(syn::Ident::from(arg.as_str()));
+            arg_vec.push(Ident::new(arg.as_str(), Span::call_site()));
             arg_vec_unpack.push({
-                let v = syn::Ident::from(arg.as_str());
+                let v = Ident::new(arg.as_str(), Span::call_site());
                 if func.args.len() == 1 {
                     quote! { #v, }
                 } else {
@@ -406,7 +378,7 @@ fn call_impls(fnmap: &FuncMap, mutability: Mutability) -> (Tokens, Vec<Tokens>) 
 }
 
 fn impls_for_access(input: &DeriveInput, mut mut_assign: bool) -> Tokens {
-    let name = input.ident;
+    let name = &input.ident;
     let mut skip_bound_set = HashSet::new();
     let mut fnmap = BTreeMap::new();
 
@@ -509,7 +481,7 @@ fn impls_by_mutability(
                 .filter(|f| !is_skipped(&f.attrs))
                 .map(|f| {
                     let ident = &f.ident;
-                    idents.push(ident.unwrap().clone());
+                    idents.push(ident.as_ref().unwrap().clone());
 
                     let f_i = if in_enum {
                         quote! { #ident }
@@ -551,7 +523,7 @@ fn impls_by_mutability(
                 .filter(|f| !is_skipped(&f.attrs))
                 .map(|_| {
                     let f_i = if in_enum {
-                        let ident = syn::Ident::from(format!("f_{}", i));
+                        let ident = Ident::new(&format!("f_{}", i), Span::call_site());
                         quote! { #ident }
                     } else {
                         quote! { & #qmut self.#i }
@@ -612,7 +584,7 @@ fn impls_for_reflect(input: &DeriveInput, info: &DeriveInfo) -> Tokens {
         return quote! {};
     }
 
-    let name = input.ident;
+    let name = &input.ident;
     let generics = add_trait_bounds(input.generics.clone(), &HashSet::new(), &["Access"]);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
     let str_name = format!("{}", format!("{}", name));
@@ -689,7 +661,7 @@ fn impls_for_reflect(input: &DeriveInput, info: &DeriveInfo) -> Tokens {
             let mut opt_names = vec![];
 
             for variant in data.variants.iter() {
-                let ident = variant.ident;
+                let ident = &variant.ident;
                 let variant_name = format!("{}", variant.ident);
                 opt_names.push(variant_name);
 
@@ -889,7 +861,10 @@ fn impl_struct_for_deser(name: Tokens, data_fields: &Fields, in_enum: bool) -> (
                     );
                 }
                 let ident = &field.ident;
-                let ident_name = syn::Ident::from(format!("_assign_{}", ident.as_ref().unwrap()));
+                let ident_name = Ident::new(
+                    &format!("_assign_{}", ident.as_ref().unwrap()),
+                    Span::call_site(),
+                );
                 let ident_str = format!("{}", ident.as_ref().unwrap());
 
                 lets.push(quote! {
@@ -1057,7 +1032,7 @@ fn impls_for_deser(kr: &Tokens, input: &DeriveInput, info: &DeriveInfo) -> (bool
         return (false, quote! {});
     }
 
-    let name = input.ident;
+    let name = &input.ident;
     let generics = add_trait_bounds(input.generics.clone(), &HashSet::new(), &["Deser"]);
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
@@ -1157,7 +1132,7 @@ fn get_interact_meta_items(attr: &syn::Attribute) -> Option<Vec<syn::NestedMeta>
 fn is_skipped(attrs: &Vec<syn::Attribute>) -> bool {
     for meta_items in attrs.iter().filter_map(get_interact_meta_items) {
         for meta_item in meta_items {
-            match meta_item {
+            match &meta_item {
                 Meta(Word(word)) if word == "skip" => return true,
                 _ => continue,
             }
@@ -1177,7 +1152,7 @@ fn add_trait_bounds(
                 continue;
             }
             for trait_name in trait_names {
-                let trait_name = syn::Ident::from(*trait_name);
+                let trait_name = Ident::new(*trait_name, Span::call_site());
                 let bound = syn::parse(quote! { #trait_name }.into()).unwrap();
                 type_param.bounds.push(bound);
             }

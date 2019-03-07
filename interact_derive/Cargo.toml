@@ -17,6 +17,6 @@ include = ["Cargo.toml", "src/**/*.rs", "crates-io.md", "README.md", "LICENSE-AP
 proc-macro = true
 
 [dependencies]
-syn = { version = "0.12", features = ["extra-traits", "full"]  }
-quote = "0.4"
-proc-macro2 = "0.2"
+syn = { version = "0.15", features = ["extra-traits", "full"]  }
+quote = "0.6"
+proc-macro2 = "0.4"

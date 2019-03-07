@@ -1,6 +1,5 @@
 #![recursion_limit = "256"]
 extern crate proc_macro;
-extern crate serde_derive_internals;
 extern crate syn;
 
 use proc_macro::TokenStream;

@@ -13,7 +13,7 @@ use crate::{
 };
 use crate::{Assist, NextOptions};
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum ClimbError {
     AssignError(crate::access::AssignError),
     Borrowed,

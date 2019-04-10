@@ -1,6 +1,6 @@
 [package]
 name = "interact"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Dan Aloni <alonid@gmail.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"
@@ -14,7 +14,7 @@ readme = "crates-io.md"
 include = ["Cargo.toml", "src/**/*.rs", "src/**/*.pest", "tests/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [dependencies]
-interact_derive = "0.3.1"
+interact_derive = "0.3.2"
 ron = "0.4"
 pest = "2.0.1"
 pest_derive = "2.0.1"

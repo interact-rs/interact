@@ -95,6 +95,10 @@ impl Context {
         verify!(self, root.access("basic.u_64 = 1234") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 17, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
         verify!(self, root.access("basic.u_64") => "(Ok(NodeTree { info: Leaf(\"1234\"), meta: Some(Wrap(1)), size: 5 }), Assist { valid: 10, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
 
+        // Token parsing error
+
+        verify!(self, root.access("state.complex.0.0.0.0 = 100000000000000000001") => "(Err(TokenError(IntError(ParseIntError { kind: Overflow }))), Assist { valid: 0, pending: 0, pending_special: 0, next_options: Avail(0, []) })");
+
         // Verify calling immutable methods from prompt
 
         verify!(self, root.access("complex.tuple.0.0 = 3") => "(Ok(NodeTree { info: Leaf(\"\"), meta: None, size: 1 }), Assist { valid: 21, pending: 0, pending_special: 0, next_options: Avail(0, []) })");

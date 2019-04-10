@@ -20,6 +20,7 @@ pub enum ClimbError {
     BorrowedMut,
     CallError(crate::access::CallError),
     DeserError(crate::deser::DeserError),
+    TokenError(crate::tokens::Error),
     Indirect,
     Locked,
     MissingStartComponent,

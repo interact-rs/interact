@@ -120,7 +120,6 @@ impl<'a, 'b> Root<'a, 'b> {
             .map(|x| String::from(&x[..]))
             .collect();
 
-        let tokens = parse_to_tokens(path_str).unwrap_or_else(|e| panic!("{:?}", e));
         let ret_assist = |valid| {
             let mut assist = Assist::default();
             let matching: Vec<_> = matching_prefix_keys;
@@ -128,6 +127,12 @@ impl<'a, 'b> Root<'a, 'b> {
                 assist.pend(valid)
             }
             assist.next_options(NextOptions::Avail(0, matching))
+        };
+        let tokens = match parse_to_tokens(path_str).map_err(ClimbError::TokenError) {
+            Err(err) => {
+                return (Err(err), ret_assist(0));
+            }
+            Ok(tokens) => tokens,
         };
         if tokens.is_empty() {
             return (Err(ClimbError::NullPath), ret_assist(0));

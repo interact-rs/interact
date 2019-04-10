@@ -602,6 +602,7 @@
 <span id="602">602</span>
 <span id="603">603</span>
 <span id="604">604</span>
+<span id="605">605</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">RefCell</span>;
@@ -618,13 +619,14 @@
 };
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Assist</span>, <span class="ident">NextOptions</span>};
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">ClimbError</span> {
     <span class="ident">AssignError</span>(<span class="kw">crate</span>::<span class="ident">access</span>::<span class="ident">AssignError</span>),
     <span class="ident">Borrowed</span>,
     <span class="ident">BorrowedMut</span>,
     <span class="ident">CallError</span>(<span class="kw">crate</span>::<span class="ident">access</span>::<span class="ident">CallError</span>),
     <span class="ident">DeserError</span>(<span class="kw">crate</span>::<span class="ident">deser</span>::<span class="ident">DeserError</span>),
+    <span class="ident">TokenError</span>(<span class="kw">crate</span>::<span class="ident">tokens</span>::<span class="ident">Error</span>),
     <span class="ident">Indirect</span>,
     <span class="ident">Locked</span>,
     <span class="ident">MissingStartComponent</span>,

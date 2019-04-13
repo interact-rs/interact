@@ -197,7 +197,7 @@ pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
     let mut last_end = 0;
 
     for pair in pairs {
-        let span = pair.clone().into_span();
+        let span = pair.clone().as_span();
         let mut stop = false;
 
         let token_inner = match pair.as_rule() {

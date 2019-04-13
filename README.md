@@ -14,7 +14,8 @@
 You may be looking for:
 
 * [Book](https://interact-rs.github.io/interact/book/) (master).
-* [Docs](https://interact-rs.github.io/interact/doc/interact/index.html) (master).
+* Crate docs of `interact_prompt`: [latest](https://docs.rs/interact_prompt), [master](https://interact-rs.github.io/interact/doc/interact_prompt/index.html)
+* Crate docs of `interact`: [latest](https://docs.rs/interact), [master](https://interact-rs.github.io/interact/doc/interact/index.html)
 
 ---
 

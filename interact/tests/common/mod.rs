@@ -136,6 +136,7 @@ struct UnnamedFields(String, u32);
 #[derive(Interact)]
 struct UnitStruct;
 
+/// A doc comment for testing.
 #[derive(Interact)]
 #[interact(immut_fn(check()))]
 #[interact(mut_fn(add(a)))]
@@ -263,6 +264,7 @@ impl Rand for LocalRcLoop {
     }
 }
 
+/// A doc comment for testing.
 #[derive(Interact)]
 pub struct LocalComplex {
     rc_loop: LocalRcLoop,

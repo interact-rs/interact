@@ -55,3 +55,4 @@ sourcesIndex['interact_prompt'] = {"name":"","dirs":[],"files":["lib.rs","print.
 sourcesIndex['interact_prompt'] = {"name":"","dirs":[],"files":["lib.rs","print.rs","registry.rs"]};
 sourcesIndex['interact_prompt'] = {"name":"","dirs":[],"files":["lib.rs","print.rs","registry.rs"]};
 sourcesIndex['interact_prompt'] = {"name":"","dirs":[],"files":["lib.rs","print.rs","registry.rs"]};
+createSourceSidebar();

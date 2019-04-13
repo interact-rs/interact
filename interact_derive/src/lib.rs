@@ -180,7 +180,7 @@ fn get_attr_info(
 ) {
     for func in attribute.tts.clone().into_iter() {
         let ts = match &func {
-            TokenTree::Punct(_punct) => {
+            TokenTree::Literal { .. } | TokenTree::Punct { .. } => {
                 // Skip comments
                 continue;
             }

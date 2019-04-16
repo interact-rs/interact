@@ -178,6 +178,19 @@ fn get_attr_info(
     skip_bound_set: &mut HashSet<String>,
     mut_assign: &mut bool,
 ) {
+    match attribute.path.segments.last() {
+        None => {
+            // Ignore this attribute
+            return;
+        }
+        Some(first_segment) => {
+            if first_segment.value().ident.to_string() != "interact" {
+                // Ignore this attribute, it does not relate to Interact
+                return;
+            }
+        }
+    }
+
     for func in attribute.tts.clone().into_iter() {
         let ts = match &func {
             TokenTree::Literal { .. } | TokenTree::Punct { .. } => {

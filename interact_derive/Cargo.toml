@@ -1,6 +1,6 @@
 [package]
 name = "interact_derive"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Dan Aloni <alonid@gmail.com>"]
 edition = "2018"
 license = "MIT/Apache-2.0"

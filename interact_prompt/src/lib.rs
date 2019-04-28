@@ -397,7 +397,7 @@ pub enum PromptError {
 /// Use the current thread for an interactive `Interact` prompt.
 pub fn direct<H>(settings: Settings, handler: H) -> Result<(), PromptError>
 where
-    H: Handler + Send + Sync + 'static,
+    H: Handler
 {
     let config = Config::builder()
         .history_ignore_space(true)

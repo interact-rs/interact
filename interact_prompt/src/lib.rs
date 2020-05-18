@@ -52,7 +52,7 @@ use rustyline::error::ReadlineError;
 use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::Helper;
-use rustyline::{CompletionType, Config, EditMode, Editor};
+use rustyline::{CompletionType, Config, Context, EditMode, Editor};
 use std::borrow::Cow::{self, Borrowed, Owned};
 use std::collections::BTreeMap;
 use std::thread;
@@ -327,14 +327,14 @@ where
 {
     type Candidate = String;
 
-    fn complete(&self, line: &str, pos: usize) -> Result<(usize, Vec<String>), ReadlineError> {
+    fn complete(&self, line: &str, pos: usize, _ctx: &Context<'_>) -> Result<(usize, Vec<String>), ReadlineError> {
         let (valid, _, _, options) = Commands::new().get_next_options(line, pos).dismantle();
         Ok(options.into_position(valid))
     }
 }
 
 impl<'a, H> Hinter for InteractPromptHelper<'a, H> {
-    fn hint(&self, line: &str, pos: usize) -> Option<String> {
+    fn hint(&self, line: &str, pos: usize, _ctx: &Context<'_>) -> Option<String> {
         let (valid, _, _, options) = Commands::new().get_next_options(line, pos).dismantle();
         let (from_pos, v) = options.into_position(valid);
         if v.len() == 1 {
@@ -380,7 +380,7 @@ impl<'a, H> Highlighter for InteractPromptHelper<'a, H> {
         Owned(format!("{}{}{}{}", ok, pending, pending_valid, err))
     }
 
-    fn highlight_char(&self, _grapheme: &str) -> bool {
+    fn highlight_char(&self, _grapheme: &str, _pos: usize) -> bool {
         false
     }
 }
@@ -438,7 +438,7 @@ where
 
         let interaction = match line {
             Ok(line) => {
-                rl.add_history_entry(line.as_ref());
+                rl.add_history_entry(&line);
                 Interaction::Line(line)
             }
             Err(ReadlineError::Interrupted) => Interaction::CtrlC,

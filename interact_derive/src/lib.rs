@@ -539,6 +539,7 @@ fn impls_by_mutability(
                         let ident = Ident::new(&format!("f_{}", i), Span::call_site());
                         quote! { #ident }
                     } else {
+                        let i = syn::Index::from(i);
                         quote! { & #qmut self.#i }
                     };
 

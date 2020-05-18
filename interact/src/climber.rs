@@ -47,13 +47,13 @@ pub struct Climber<'a> {
 
 #[doc(hidden)]
 pub enum EnumOrStruct<'a> {
-    Enum(&'a ReflectEnum),
+    Enum(&'a dyn ReflectEnum),
     Struct(&'a dyn ReflectStruct),
 }
 
 #[doc(hidden)]
 pub enum EnumOrStructMut<'a, 'b> {
-    Enum(&'b mut ReflectEnum),
+    Enum(&'b mut dyn ReflectEnum),
     Struct(&'a mut dyn ReflectStruct),
 }
 

@@ -12,10 +12,10 @@ use crate::{deser, ClimbError, Climber, NodeTree, Reflector};
 /// passing, the traversal can continue upon message reception.
 pub trait ReflectIndirect {
     /// Provides indirection for immutable access.
-    fn indirect(&self, fnc: Box<FnMut(&dyn Access) + Send>);
+    fn indirect(&self, fnc: Box<dyn FnMut(&dyn Access) + Send>);
 
     /// Provides indirection for mutable access.
-    fn indirect_mut(&mut self, fnc: Box<FnMut(&mut dyn Access) + Send>);
+    fn indirect_mut(&mut self, fnc: Box<dyn FnMut(&mut dyn Access) + Send>);
 }
 
 /// The direct Reflect allows direct climber or reflector access, and meant
@@ -113,7 +113,7 @@ pub enum CallError {
     NoSuchFunction,
 }
 
-pub type RetValCallback<'a> = Box<FnMut(&dyn Access, &mut Climber<'a>)>;
+pub type RetValCallback<'a> = Box<dyn FnMut(&dyn Access, &mut Climber<'a>)>;
 
 /// The `Access` trait, meant to be used as a trait object, provides methods that
 /// dynamically expose read&write access to the underlying objects.

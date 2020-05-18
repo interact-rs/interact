@@ -53,6 +53,7 @@ use rustyline::highlight::Highlighter;
 use rustyline::hint::Hinter;
 use rustyline::Helper;
 use rustyline::{CompletionType, Config, Context, EditMode, Editor};
+use rustyline::validate::Validator;
 use std::borrow::Cow::{self, Borrowed, Owned};
 use std::collections::BTreeMap;
 use std::thread;
@@ -386,6 +387,8 @@ impl<'a, H> Highlighter for InteractPromptHelper<'a, H> {
 }
 
 impl<'a, H> Helper for InteractPromptHelper<'a, H> {}
+
+impl<'a, H> Validator for InteractPromptHelper<'a, H> {}
 
 impl Handler for () {}
 

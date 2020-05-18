@@ -350,7 +350,7 @@ impl<'a, H> Hinter for InteractPromptHelper<'a, H> {
 }
 
 impl<'a, H> Highlighter for InteractPromptHelper<'a, H> {
-    fn highlight_prompt<'p>(&self, prompt: &'p str) -> Cow<'p, str> {
+    fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, _default: bool) -> Cow<'b, str> {
         Borrowed(prompt)
     }
 

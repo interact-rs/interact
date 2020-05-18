@@ -14,7 +14,7 @@ readme = "crates-io.md"
 include = ["Cargo.toml", "src/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
 
 [dependencies]
-rustyline = "4.1"
+rustyline = "5.0"
 interact = "0.3.5"
 lazy_static = "1.2"
 ansi_term = "0.11"

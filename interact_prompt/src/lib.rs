@@ -340,7 +340,8 @@ impl<'a, H> Hinter for InteractPromptHelper<'a, H> {
         let (from_pos, v) = options.into_position(valid);
         if v.len() == 1 {
             if from_pos < pos {
-                Some(v[0][pos - from_pos..].to_owned())
+                let v0_len = v[0].len();
+                Some(v[0][std::cmp::min(pos - from_pos, v0_len)..].to_owned())
             } else {
                 Some(v[0].to_owned())
             }

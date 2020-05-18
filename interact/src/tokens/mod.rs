@@ -203,10 +203,10 @@ pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
         let token_inner = match pair.as_rule() {
             Rule::identifier => TokenKind::Ident,
             Rule::nonnegative_decimal => {
-                TokenKind::NonNegativeDecimal({ span.as_str().parse().map_err(Error::IntError)? })
+                TokenKind::NonNegativeDecimal(span.as_str().parse().map_err(Error::IntError)?)
             }
             Rule::decimal => {
-                TokenKind::Decimal({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
+                TokenKind::Decimal(ron::de::from_str(span.as_str()).map_err(Error::RonError)?)
             }
             Rule::invalid => {
                 stop = true;
@@ -223,13 +223,13 @@ pub fn parse_to_tokens<'a>(s: &'a str) -> Result<Vec<Token<'a>>, Error> {
             Rule::colon => TokenKind::Colon,
             Rule::asterix => TokenKind::Asterix,
             Rule::char_literal => {
-                TokenKind::Char({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
+                TokenKind::Char(ron::de::from_str(span.as_str()).map_err(Error::RonError)?)
             }
             Rule::assign => TokenKind::Assign,
             Rule::range_access => TokenKind::Range(false),
             Rule::range_access_inclusive => TokenKind::Range(true),
             Rule::string_literal => {
-                TokenKind::String({ ron::de::from_str(span.as_str()).map_err(Error::RonError)? })
+                TokenKind::String(ron::de::from_str(span.as_str()).map_err(Error::RonError)?)
             }
             Rule::underscore
             | Rule::alpha

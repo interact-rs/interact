@@ -19,19 +19,19 @@ You may be looking for:
 
 ---
 
-Interact is useful for server programs that otherwise receive no input. You can use Interact to make your server receive commands using the special prompt from the `interact_prompt` crate. The commands can be used to browse your server's internal state, modify it, and call method functions that were specified in `interact` derive attributes.
+Interact is useful for server programs that otherwise receive no input. You can use Interact to make your server receive commands using the special prompt from the `interact_prompt` crate. The commands can be used to browse your server's internal state, modify it, and call methods that were specified in `interact` derive attributes.
 
 Interact is implemented for stable Rust, using only safe mode.
 
 ## Introduction
 
-While dynamically-typed interpreted languages offer the advantage of being able look at a running program state using a prompt, compiled languages often do not provide that feature. Being hard as it is to introduce interpreters into compiled languages, the Interact project aimes to provide a midway solution using stable Rust.
+While dynamically-typed interpreted languages offer the advantage of being able to look at a running program state using a prompt, compiled languages often do not provide that feature. Being hard as it is to introduce interpreters into compiled languages, the Interact project aims to provide a midway solution using stable Rust.
 
 ## How to make your server Interact-able
 
 * Custom-derive types using `#[derive(Interact)]`.
-	* Use `#[interact(skip)` for problematic fields.
-	* No need to worry about `Rc`, `RefCell`, `Arc`, `Mutex`, even with reference loops. Handling for that exists, as demonstrated further.
+	* Use `#[interact(skip)]` for problematic fields.
+	* No need to worry about `Rc`, `RefCell`, `Arc`, or `Mutex`, even with reference loops. Handling for that exists, as demonstrated later.
 * Register process-global or TLS-local state via `interact_prompt`'s registry.
 * Invoke `interact_prompt` either directly or in its own OS thread (async not supported yet).
 
@@ -39,11 +39,11 @@ While dynamically-typed interpreted languages offer the advantage of being able 
 
 * Provide Rust-like expressions to explore from the root nodes, e.g. `node.some_map["value"].field.sub_field`.
 * Full auto-complete and completion hints for type names, field names, enum names, function names, and punctuation.
-* Modify the state from the prompt: at places where mutable access is possible in compile time, you can assign to fields of inner structs in run-time via appending `= <value>`.
-* It is possible to call method functions that were linked in using special `interact` attributes.
+* Modify the state from the prompt: at places where mutable access is possible at compile-time, you can assign to fields of inner structs at run-time by appending `= <value>`.
+* It is possible to call methods that were linked using special `interact` attributes.
 * State prints have an adjustable limit - if the state is too big it can be automatically capped so your terminal is not overwhelmed.
-* Reference cycles (via `Rc` or otherwise) are handled gracefully in reflected values - a unique number is printed at the all the common sites: the first encounter and the repeats.
-* Data indirection is supported - for example Actix's `Addr<T>` can be traversed into, exposing the full server state (see the [example in the book](https://interact-rs.github.io/interact/book/examples/actix.html)).
+* Reference cycles (via `Rc` or otherwise) are handled gracefully in reflected values - a unique number is printed at all the common sites: the first encounter and the repeats.
+* Data indirection is supported - for example, Actix's `Addr<T>` can be traversed into, exposing the full server state (see the [example in the book](https://interact-rs.github.io/interact/book/examples/actix.html)).
 
 ## Interact mini-example with a recorded demo
 
@@ -85,9 +85,9 @@ fn main() -> Result<(), interact_prompt::PromptError> {
 }
 ```
 
-(this is just one mode for using the Interact prompt. Another mode is running it in the background allowing to traverse, access, and modify global process state safeuly and without interference).
+(this is just one mode for using the Interact prompt. Another mode is running it in the background allowing it to traverse, access, and modify the global process state safely and without interference).
 
-When cloning this repository, this it can be run using `cargo run --example mini-example`. Here's a recorded session:
+When cloning this repository, it can be run using `cargo run --example mini-example`. Here's a recorded session:
 
 <p align="center">
   <img src="doc/demo.apng">
@@ -114,4 +114,4 @@ at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in Interact by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
+dual-licensed as above, without any additional terms or conditions.
